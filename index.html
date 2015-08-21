@@ -125,6 +125,7 @@
                     <ol>
                         <li>
                             <a href="#/installation">Installation</a>
+                            <a href="#/new">New Project</a>
                         </li>
                     </ol>
                 </section>
@@ -219,11 +220,133 @@ mix archive.install https://github.com/phoenixframework/phoenix/releases/downloa
                         </aside>
                     </section>
                 </section>
+                <section class="stack">
+                    <section id="new">
+                        <h1>New Project</h1>
+                        <ol>
+                            <li>
+                                <a href="#/new-mix-phoenix">
+                                    <code>mix phoenix.new</code>
+                                </a>
+                            </li>
+                        </ol>
+                    </section>
+                    <section id="new-mix-phoenix">
+                        <h1>
+                            <code>mix phoenix.new</code> Options
+                        </h1>
+                        <table>
+                            <thead>
+                            <tr>
+                                <th>
+                                    Option
+                                </th>
+                                <th>
+                                    Description
+                                </th>
+                                <th>
+                                    Format
+                                </th>
+                                <th>
+                                    Example
+                                </th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td>
+                                    <code>--app APP</code>
+                                </td>
+                                <td>The name of the OTP application</td>
+                                <td>Atom</td>
+                                <td>
+                                    <code>routing_securely_with_phoenix_framework</code>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <code>--database DATABASE</code>
+                                </td>
+                                <td>Specify the database adapter for ecto</td>
+                                <td>
+                                    <ul>
+                                        <li>
+                                            <code>mssql</code>
+                                        </li>
+                                        <li>
+                                            <code>mysql</code>
+                                        </li>
+                                        <li>
+                                            <code>postgres</code> (default)
+                                        </li>
+                                        <li>
+                                            <code>sqlite</code>
+                                        </li>
+                                    </ul>
+                                </td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <code>--module MODULE</code>
+                                </td>
+                                <td>The name of the base module in the generated skeleton</td>
+                                <td>Alias</td>
+                                <td>
+                                    <code>RoutingSecurelyWithPhoenixFramework</code>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <code>--no-ecto</code>
+                                </td>
+                                <td>Do not generate Ecto files for the model layer</td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <code>--no-brunch</code>
+                                </td>
+                                <td>Do not generate brunch files for static asset building</td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                        <aside class="notes">
+                            <p>
+                                Normally, you don't need to specify any of these options and they are just derived
+                                from the directory name, but if you want to use a different naming scheme or
+                                nested namespaces, you'll need to manually override APP and MODULE.
+                            </p>
+                            <p>
+                                By default, phoenix dot new (<code>phoenix.new</code>) will use Ecto with Postgres,
+                                but if you prefer a different database you can override that with dash dash database
+                                (<code>--database</code>).  If you don't need a database at all, you can disable Ecto
+                                with dash dash no dash ecto (<code>--no-ecto</code>).
+                            </p>
+                            <p>
+                                Even if you need a database, you could still create the project without ecto if you
+                                want to use a built-in Erlang database like Mnesia or DETS.  Or a NOSQL alternative like
+                                Riak that Ecto doesn't support.
+                            </p>
+                            <p>
+                                You could dash dash no dash brunch (<code>--no-brunch</code>) if you want to use
+                                something other than brunch, such as webpack, to compile your assets, or if you
+                                don't have HTML or assets because you're just building a JSON API or channel server.
+                            </p>
+                        </aside>
+                    </section>
+                </section>
                 <section>
                     <h1>Sources</h1>
                     <ul>
                         <li>
                             <a href="http://www.phoenixframework.org/docs/installation">Phoenix Framework Installation Guide</a>
+                        </li>
+                        <li>
+                            <code>mix help phoenix.new</code>
                         </li>
                     </ul>
                 </section>
