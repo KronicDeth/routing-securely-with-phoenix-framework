@@ -120,8 +120,106 @@
                         </p>
                     </aside>
 				</section>
+                <section>
+                    <h1>Outline</h1>
+                    <ol>
+                        <li>
+                            <a href="#/installation">Installation</a>
+                        </li>
+                    </ol>
+                </section>
+                <section class="stack">
+                    <section id="installation">
+                        <h1>Installation</h1>
+                        <ul>
+                            <li>
+                                <a href="#/installation-node">Node</a>
+                            </li>
+                            <li>
+                                <a href="#/installation-mix"><code>mix</code> archives</a>
+                            </li>
+                        </ul>
+                    </section>
+                    <section id="installation-node">
+                        <h1>Node</h1>
+                        <table>
+                            <thead>
+                            <tr>
+                                <th>Source</th>
+                                <th>Linux</th>
+                                <th>Mac</th>
+                                <th>Windows</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td>
+                                    <a href="https://nodejs.org/download/">nodejs.org</a>
+                                </td>
+                                <td>
+                                    <a href="https://nodejs.org/dist/v0.12.7/node-v0.12.7-linux-x64.tar.gz">
+                                        <code>tar.gz</code>
+                                    </a>
+                                </td>
+                                <td>
+                                    <a href="https://nodejs.org/dist/v0.12.7/node-v0.12.7.pkg">
+                                        <code>pkg</code>
+                                    </a>
+                                <td>
+                                    <a href="https://nodejs.org/dist/v0.12.7/node-v0.12.7-x86.msi">
+                                        <code>msi</code>
+                                    </a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>homebrew</td>
+                                <td></td>
+                                <td><code>brew install node</code></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>apt-get</td>
+                                <td>
+                                    <code>sudo apt-get install nodejs-legacy</code>
+                                </td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                        <aside class="notes">
+                            <p>
+                                Node is required for brunch.io, which is used for asset compilation.  It is optional,
+                                but I'll be using it as it's easiest to setup when starting a new phoenix project.
+                            </p>
+                            <p>
+                                I'm going to assume you already have Erlang and Elixir installed.
+                            </p>
+                        </aside>
+                    </section>
+                    <section id="installation-mix">
+                        <h1>Installing Mix Archives</h1>
+                        <pre><code class="bash" data-trim>
+mix local.hex
+mix archive.install https://github.com/phoenixframework/phoenix/releases/download/v0.17.0/phoenix_new-0.17.0.ez
+                        </code></pre>
+                        <aside class="notes">
+                            <p>
+                                <code>mix local.hex</code> ensures your version of the hex package manager is up-to-date.
+                            </p>
+                            <p>
+                                The archive DOT install (<code>archive.install</code>) pulls down the
+                                phoenix DOT new (<code>phoenix.new</code>) task from github.
+                            </p>
+                            <p>
+                                As you can see by the URL, this talk is based on Phoenix zero dot seventeen (0.17),
+                                which was the latest version as of 2015-08-20.  zero DOT seventeen is the last release
+                                before one dot zero (1.0).
+                            </p>
+                        </aside>
+                    </section>
+                </section>
 			</div>
-
 		</div>
 
 		<script src="lib/js/head.min.js"></script>
