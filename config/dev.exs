@@ -25,11 +25,3 @@ config :routing_securely_with_phoenix_framework, RoutingSecurelyWithPhoenixFrame
 
 # Do not include metadata nor timestamps in development logs
 config :logger, :console, format: "[$level] $message\n"
-
-# Configure your database
-config :routing_securely_with_phoenix_framework, RoutingSecurelyWithPhoenixFramework.Repo,
-  adapter: Ecto.Adapters.Postgres,
-  username: "postgres",
-  password: "postgres",
-  database: "routing_securely_with_phoenix_framework_dev",
-  size: 10 # The amount of database connections in the pool

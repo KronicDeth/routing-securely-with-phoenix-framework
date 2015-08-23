@@ -9,7 +9,6 @@ use Mix.Config
 config :routing_securely_with_phoenix_framework, RoutingSecurelyWithPhoenixFramework.Endpoint,
   url: [host: "localhost"],
   root: Path.dirname(__DIR__),
-  secret_key_base: "HtCA7UORB1YzWf8BqkbkVWlc99Snn6WybDfc4sEGTT2iRDksOJFviNfqt+x9eQec",
   render_errors: [default_format: "html"],
   pubsub: [name: RoutingSecurelyWithPhoenixFramework.PubSub,
            adapter: Phoenix.PubSub.PG2]
@@ -22,3 +21,4 @@ config :logger, :console,
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{Mix.env}.exs"
+import_config "#{Mix.env}.secret.exs"

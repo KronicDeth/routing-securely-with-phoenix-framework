@@ -55,7 +55,3 @@ config :logger, level: :info
 #
 #     config :routing_securely_with_phoenix_framework, RoutingSecurelyWithPhoenixFramework.Endpoint, server: true
 #
-
-# Finally import the config/prod.secret.exs
-# which should be versioned separately.
-import_config "prod.secret.exs"

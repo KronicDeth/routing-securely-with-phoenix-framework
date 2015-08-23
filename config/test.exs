@@ -8,11 +8,3 @@ config :routing_securely_with_phoenix_framework, RoutingSecurelyWithPhoenixFrame
 
 # Print only warnings and errors during test
 config :logger, level: :warn
-
-# Configure your database
-config :routing_securely_with_phoenix_framework, RoutingSecurelyWithPhoenixFramework.Repo,
-  adapter: Ecto.Adapters.Postgres,
-  username: "postgres",
-  password: "postgres",
-  database: "routing_securely_with_phoenix_framework_test",
-  pool: Ecto.Adapters.SQL.Sandbox
