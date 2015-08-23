@@ -1,0 +1,3 @@
+defmodule RoutingSecurelyWithPhoenixFramework.LayoutViewTest do
+  use RoutingSecurelyWithPhoenixFramework.ConnCase, async: true
+end
