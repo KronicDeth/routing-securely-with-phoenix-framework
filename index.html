@@ -227,13 +227,38 @@ mix archive.install https://github.com/phoenixframework/phoenix/releases/downloa
                         <h1>New Project</h1>
                         <ol>
                             <li>
+                                <a href="#/new-mix-phoenix-options">
+                                    <code>mix phoenix.new</code> Options
+                                </a>
+                            </li>
+                            <li>
                                 <a href="#/new-mix-phoenix">
                                     <code>mix phoenix.new</code>
                                 </a>
                             </li>
+                            <li>
+                                <p>Fetch and Install Dependencies</p>
+                                <ul>
+                                    <li>
+                                        <a href="#/new-fetch-and-install-dependencies">
+                                            New
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="#/new-clone-fetch-and-install-dependencies">
+                                            Clone
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li>
+                                <a href="#/new-run">
+                                    Run
+                                </a>
+                            </li>
                         </ol>
                     </section>
-                    <section id="new-mix-phoenix">
+                    <section id="new-mix-phoenix-options">
                         <h1>
                             <code>mix phoenix.new</code> Options
                         </h1>
@@ -337,6 +362,106 @@ mix archive.install https://github.com/phoenixframework/phoenix/releases/downloa
                                 You could dash dash no dash brunch (<code>--no-brunch</code>) if you want to use
                                 something other than brunch, such as webpack, to compile your assets, or if you
                                 don't have HTML or assets because you're just building a JSON API or channel server.
+                            </p>
+                        </aside>
+                    </section>
+                    <section id="new-mix-phoenix">
+                        <h1>
+                            <code>mix phoenix.new</code>
+                        </h1>
+                        <img alt="mix phoenix.new routing_securely_with_phoenix_framework"
+                             class="stretch"
+                             src="images/mix%20phoenix.new.png"/>
+                        <aside class="notes">
+                            <p>
+                                mix phoenix dot new (<code>mix phoenix.new</code>) with only a path will create config
+                                files for dev, prod, and test environments; a single endpoint for this project; views
+                                for errors and layout; ExUnit-based tests; a user socket for handling client connections
+                                for channels; a default page controller; templates for the layout and page views;
+                                the routes; the Ecto repo; and the default assets.
+                            </p>
+                        </aside>
+                    </section>
+                    <section id="new-fetch-and-install-dependencies">
+                        <h1>Fetch and Install Dependencies</h1>
+                        <img alt="Fetch and install dependencies to install javascript libraries with npm install and install elixir dependencies with mix deps.get"
+                             class="stretch"
+                             src="images/fetch-and-install-dependencies.png">
+                        <aside class="notes">
+                            <p>
+                                mix phoenix dot new (<code>mix phoenix.new</code>) is interactive and after creating the
+                                files we saw on the last slide, the mix task will ask if you want to install
+                                dependencies.
+                            </p>
+                            <p>
+                                Saying 'yes', will install the javascript dependencies with N-P-M install
+                                (<code>npm install</code>) and the Elixir dependencies with mix deps dot get
+                                (<code>mix deps.get</code>)
+                            </p>
+                            <p>
+                                Please take note that the prompt only happens when creating a new project.  If you clone
+                                a pre-existing project...
+                            </p>
+                        </aside>
+                    </section>
+                    <section id="new-clone-fetch-and-install-dependencies">
+                        <h1>Fetching and Install Dependencies for Clone</h1>
+                        <table class="stretch">
+                            <thead>
+                            <tr>
+                                <th>Error</th>
+                                <th>Solution</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td>
+                                    <img alt="Error telling user to run mix deps.get when running mix phoenix.server"
+                                         src="images/unchecked-dependency-error.png"
+                                         style="height: 40; width: auto"/>
+                                </td>
+                                <td>
+                                    <code>mix deps.get</code>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <img alt="Error telling user to run npm install for brunch when running mix phoenix.server"
+                                         src="images/node-watcher-error.png"
+                                         style="height: 40vh; width: auto"/>
+                                </td>
+                                <td>
+                                    <code>npm install</code>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                        <aside class="notes">
+                            <p>
+                                ...you need to run mix deps dot get (<code>mix deps.get</code>) and
+                                N-P-M install (<code>npm install</code>) manually.
+                            </p>
+                            <p>
+                                If you forget to run either of these steps and start mix phoenix dot server
+                                (<code>mix phoenix.server</code>), the log will helpfully contain errors telling you
+                                the command to run.
+                            </p>
+                            <p>
+                                In Phoenix, and Elixir in general, if an error message isn't helpful it is considered a
+                                bug and you should open an issue with the project on Github.
+                            </p>
+                        </aside>
+                    </section>
+                    <section>
+                        <h1>Run your application</h1>
+                        <img alt="cd routing_securely_with_phoenix; mix ecto.create; mix phoenix.server"
+                             class="stretch"
+                             src="images/run.png"/>
+                        <aside class="notes">
+                            <p>
+                                The output from mix phoenix dot new (<code>mix phoenix.new</code>) will now tell you
+                                to C-D (<code>cd</code>) to project directory; create the database; and run the server,
+                                but before you do that you should secure your database.
                             </p>
                         </aside>
                     </section>
