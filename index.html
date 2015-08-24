@@ -129,6 +129,9 @@
                         <li>
                             <a href="#/new">New Project</a>
                         </li>
+                        <li>
+                            <a href="#/configuration">Configuration</a>
+                        </li>
                     </ol>
                 </section>
                 <section class="stack">
@@ -462,6 +465,490 @@ mix archive.install https://github.com/phoenixframework/phoenix/releases/downloa
                                 The output from mix phoenix dot new (<code>mix phoenix.new</code>) will now tell you
                                 to C-D (<code>cd</code>) to project directory; create the database; and run the server,
                                 but before you do that you should secure your database.
+                            </p>
+                        </aside>
+                    </section>
+                </section>
+                <section class="stack">
+                    <section id="configuration">
+                        <h1>Configuration</h1>
+                        <ul>
+                            <li>
+                                <a href="#/configuration-default">
+                                    Default Configuration
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#/configuration-remove-shared-secret-key-base">
+                                    Remove Shared <code>secret_key_base</code>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#/configuration-secret-configuration-for-each-environment">
+                                    Secret configuration for each environment
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#/configuration-secret-key-base">
+                                    Generating new <code>secret_key_base</code>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#/configuration-password">
+                                    Generating database passwords
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#/configuration-dev-secret">
+                                    <code>config/dev.secret.exs</code>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#/configuration-test-secret">
+                                    <code>config/test.secret.exs</code>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#/configuration-create-user">
+                                    Create PostgreSQL users
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#/configuration-create-database">
+                                    Create Database
+                                </a>
+                            </li>
+                        </ul>
+                    </section>
+                    <section id="#/configuration">
+                        <h1>Default Configuration</h1>
+                        <table>
+                            <thead>
+                            <tr>
+                                <th>Environment</th>
+                                <th>Module</th>
+                                <th>key</th>
+                                <th>File</th>
+                                <th>Source Controlled?</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td>All</td>
+                                <td>
+                                    <code>Endpoint</code>
+                                </td>
+                                <td>
+                                    <code>secret_key_base</code>
+                                </td>
+                                <td>
+                                    <code>config/config.exs</code>
+                                </td>
+                                <td>Yes</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <code>dev</code>
+                                </td>
+                                <td>
+                                    <code>Repo</code>
+                                </td>
+                                <td>
+                                    <code>password</code>
+                                </td>
+                                <td>
+                                    <code>config/dev.exs</code>
+                                </td>
+                                <td>Yes</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <code>prod</code>
+                                </td>
+                                <td>
+                                    <code>Endpoint</code>
+                                </td>
+                                <td>
+                                    <code>secret_key_base</code>
+                                </td>
+                                <td>
+                                    <code>config/prod.secret.exs</code>
+                                </td>
+                                <td>No</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <code>prod</code>
+                                </td>
+                                <td>
+                                    <code>Repo</code>
+                                </td>
+                                <td>
+                                    <code>password</code>
+                                </td>
+                                <td>
+                                    <code>config/prod.secret.exs</code>
+                                </td>
+                                <td>No</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <code>test</code>
+                                </td>
+                                <td>
+                                    <code>Repo</code>
+                                </td>
+                                <td>
+                                    <code>password</code>
+                                </td>
+                                <td>
+                                    <code>config/test.exs</code>
+                                </td>
+                                <td>Yes</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                        <aside class="notes">
+                            <p>
+                                Phoenix projects have two secrets: the secret key base and the database password.
+                            </p>
+                            <p>
+                                The secret key base is used by Plug for the session encryption and signing and by
+                                Phoenix for channel tokens.  If the secret key base is disclosed, it's possible to
+                                either read session cookies or fake cookies by signing session cookies containing your
+                                own data.
+                            </p>
+                            <p>
+                                The database password is of course used to log into database.  If the database password
+                                is disclosed all your data is accessible.
+                            </p>
+                            <p>
+                                By default, the <code>prod</code> secrets are kept is a separate prod dot secret dot
+                                E-X-S (<code>prod.secret.exs</code>) that is git ignored.  Not keeping production
+                                secrets in source control is a best practice.
+                            </p>
+                            <p>
+                                But, by default, Phoenix does keep your development and test secrets in source control.
+                                I see two problems with this: first, it means that your entire team uses the same
+                                secrets and second, if your repository is public I can see your secrets on github.
+                            </p>
+                            <p>
+                                You may think these aren't issues because they're not meant for production, but
+                                if you end up replicating part of your production data to development to fix a bug
+                                and some one gets access to your network, you can end up divulging production data to
+                                the attacker.
+                            </p>
+                            <p>
+                                Additionally, if you have reused and/or weak password, an attacker can use your
+                                <code>dev</code> or <code>test</code> passwords to more easily guess your production
+                                passwords.
+                            </p>
+                        </aside>
+                    </section>
+                    <section id="configuration-remove-shared-secret-key-base">
+                        <h1>Remove shared <code>secret_key_base</code></h1>
+                        <img alt="Remove secret_key_base from config/config.exs"
+                             class="stretch"
+                             src="images/remove-secret-key-base-from-config-config-exs.png"/>
+                        <aside class="notes">
+                            <p>
+                                The first step to securing the configuration is to remove the shared
+                                <code>secret_key_base</code> from <code>config/config.exs</code>, which will force
+                                each environment to supply their own <code>secret_key_base</code>.
+                            </p>
+                        </aside>
+                    </section>
+                    <section id="configuration-secret-configuration-for-each-environment">
+                        <h1>Secret configuration for each environment</h1>
+                        <figure>
+                            <figcaption>
+                                Remove secret configuration import from <code>config/prod.exs</code>
+                            </figcaption>
+                            <img alt="Remove improt_config &quot;prod.secret.exs&quot; in config/prod.exs"
+                                 src="images/remove-secret-configuration-import-from-prod.png"
+                                 style="height: auto; width: 100%"/>
+                        </figure>
+                        <figure>
+                            <figcaption>
+                                Import secret configuration for each environment in <code>config/config.exs</code>
+                            </figcaption>
+                            <img alt="import_config &quot;#{Mix.env}.secret.exs&quot; in config/config.exs"
+                                 src="images/import-config-mix-env-secret-exs.png"
+                                 style="height: auto; width: 100%"/>
+                        </figure>
+                        <figure>
+                            <figcaption>
+                                Ignore all secret configurations in git
+                            </figcaption>
+                            <img alt="git ignore config/*.secret.exs instead of config/prod.secret.exs"
+                                 src="images/git-ignore-all-secret-configurations.png"
+                                 style="height: auto; width: 100%"/>
+                        </figure>
+                        <aside class="notes">
+                            <p>
+                                The secrets for all configurations should be kept out of source control, so we'll remove
+                                the import config prod dot secret dot E-X-S
+                                (<code>import_config "prod.secret.exs"</code>) from config slash prod dot E-X-S
+                                (<code>config/prod.exs</code>) and add an import that uses mix dot env
+                                (<code>Mix.env</code>) to import an environment-specific secret configuration in
+                                config slash config dot E-X-S (<code>config/config.exs</code>).
+                            </p>
+                        </aside>
+                    </section>
+                    <section id="configuration-secret-key-base">
+                        <h1>Generating new <code>secret_key_base</code></h1>
+                        <pre><code class="elixir" data-trim>
+iex(1)> length = 64
+64
+iex(2)> :crypto.strong_rand_bytes(length) |> Base.encode64 |> binary_part(0, length)
+                        </code></pre>
+                        <aside class="notes">
+                            <p>
+                                crypto strong rand bytes (<code>:crypto.strong_random_bytes</code>) is the equivalent of
+                                using secure random (<code>SecureRandom</code>) in Ruby or reading from slash dev slash
+                                random (<code>/dev/random</code>) in Linux.
+                            </p>
+                            <p>
+                                This is the same code as mix phoenix dot new (<code>mix phoenix.new</code>) uses.
+                            </p>
+                        </aside>
+                    </section>
+                    <section id="configuraiton-password">
+                        <h1>Generating database password</h1>
+                        <ul>
+                            <li>
+                                Use a password manager
+                            </li>
+                            <li>
+                                Make the password long (> 16 characters)
+                            </li>
+                            <li>
+                                Replace password every 90 days
+                            </li>
+                        </ul>
+                        <br/>
+                        <img alt="Using KeePass to generate a 64 character password with lowe letter, upper letters, numbers, and special characters that expires in 3 months"
+                             class="scretch"
+                             src="images/keepassx.png"/>
+                        <aside class="notes">
+                            <p>
+                                The advice for a strong password applies even more so for <code>prod</code> than it does
+                                for <code>dev</code> or <code>test</code>.
+                            </p>
+                            <p>
+                                In addition to replacing your passwords every 90 days you should do the same for your
+                                secret key bases.  This will invalidate any active sessions that the user has, but this
+                                is a good thing because your users should also be replacing their passwords every 90
+                                days.
+                            </p>
+                            <p>
+                                Here, I'm using KeePassX to generate a strong password and store it, so I have it on
+                                file if I accidentally delete my secret configuration files.
+                            </p>
+                        </aside>
+                    </section>
+                    <section id="configuration-dev-secret">
+                        <h1>Dev Secrets</h1>
+                        <figure>
+                            <figcaption>
+                                Remove <code>Repo</code> configuration from <code>config/dev.exs</code>
+                            </figcaption>
+                            <img alt="Remove config APP_NAME, MODULE_NAME.Repo from config/dev.exs"
+                                 src="images/remove-repo-from-config-dev-exs.png"
+                                 style="height: auto; width: 100%"/>
+                        </figure>
+                        <figure>
+                            <figcaption>
+                                Create <code>config/dev.secret.exs</code>
+                            </figcaption>
+                            <pre><code class="elixir" data-trim>
+use Mix.Config
+
+# In this file, we keep development configuration that
+# you likely want to automate and keep it away from
+# your version control system.
+config :routing_securely_with_phoenix_framework, RoutingSecurelyWithPhoenixFramework.Endpoint,
+  secret_key_base: "SECRET_KEY_BASE"
+
+# Configure your database
+config :routing_securely_with_phoenix_framework, RoutingSecurelyWithPhoenixFramework.Repo,
+  adapter: Ecto.Adapters.Postgres,
+  database: "routing_securely_with_phoenix_framework_dev",
+  host: "127.0.0.1",
+  password: "PASSWORD",
+  size: 20, # The amount of database connections in the pool
+  username: "routing_securely_with_phoenix_framework_dev"
+                            </code></pre>
+                        </figure>
+                        <aside class="notes">
+                            <p>
+                                The config slash dev dot secret dot exs (<code>config/dev.secret.exs</code>) will have
+                                the secret key base for the endpoint and the entire repo configuration.
+                            </p>
+                            <p>
+                                You could put the common keys for the repo configuration in config slash config dot
+                                E-X-S (<code>config/config/exs</code>), but this way the reader doesn't need to know
+                                which keys are defaults.
+                            </p>
+                            <p>
+                                Notice that I'm using a separate username, that matches the database name.  This way the
+                                user can have the minimum permissions to only interact with its own database.
+                            </p>
+                        </aside>
+                    </section>
+                    <section id="configuration-test-secret">
+                        <h1>Test Secrets</h1>
+                        <figure>
+                            <figcaption>
+                                Remove <code>Repo</code> configuration from <code>config/test.exs</code>
+                            </figcaption>
+                            <img alt="Remove config APP_NAME, MODULE_NAME.Repo from config/test.exs"
+                                 src="images/remove-repo-from-config-test-exs.png"
+                                 style="height: auto; width: 100%"/>
+                        </figure>
+                        <figure>
+                            <figcaption>
+                                Create <code>config/test.secret.exs</code>
+                            </figcaption>
+                            <pre><code class="elixir" data-trim>
+use Mix.Config
+
+# In this file, we keep development configuration that
+# you likely want to automate and keep it away from
+# your version control system.
+config :routing_securely_with_phoenix_framework, RoutingSecurelyWithPhoenixFramework.Endpoint,
+  secret_key_base: "SECRET_KEY_BASE"
+
+# Configure your database
+config :routing_securely_with_phoenix_framework, RoutingSecurelyWithPhoenixFramework.Repo,
+  adapter: Ecto.Adapters.Postgres,
+  database: "routing_securely_with_phoenix_framework_test",
+  password: "PASSWORD",
+  pool: Ecto.Adapters.SQL.Sandbox,
+  username: "routing_securely_with_phoenix_framework_test"
+                            </code></pre>
+                        </figure>
+                        <aside class="notes">
+                            <p>
+                                The secrets for <code>test</code> look the same as those for <code>dev</code>, except
+                                for the removal of the <code>size</code> option and addition of the <code>pool</code>in
+                                <code>Repo</code>.
+                            </p>
+                        </aside>
+                    </section>
+                    <section id="configuration-create-user">
+                        <h1>Create PostgreSQL Users</h1>
+                        <table>
+                            <thead>
+                            <tr>
+                                <th></th>
+                                <th>Termianl</th>
+                                <th>pgAdmin</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <th>1</th>
+                                <td>
+                                    <code>createuser --createdb --encrypted --no-createrole --no-superuser --pwprompt USERNAME</code>
+                                </td>
+                                <td>Start pgAdmin3</td>
+                            </tr>
+                            <tr>
+                                <th>2</th>
+                                <td>Enter password</td>
+                                <td>Connect to server</td>
+                            </tr>
+                            <tr>
+                                <th>3</th>
+                                <td>Enter password (again)</td>
+                                <td>Right-click Login Roles</td>
+                            </tr>
+                            <tr>
+                                <th>4</th>
+                                <td></td>
+                                <td>Click New Login Role</td>
+                            </tr>
+                            <tr>
+                                <th>5</th>
+                                <td></td>
+                                <td>Enter <code>username<code> as Role Name</td>
+                            </tr>
+                            <tr>
+                                <th>6</th>
+                                <td></td>
+                                <td>Change to Definition Tab</td>
+                            </tr>
+                            <tr>
+                                <th>7</th>
+                                <td></td>
+                                <td>Enter password</td>
+                            </tr>
+                            <tr>
+                                <th>8</th>
+                                <td></td>
+                                <td>Enter password (again)</td>
+                            </tr>
+                            <tr>
+                                <th>9</th>
+                                <td></td>
+                                <td>Change to Role Privileges Tab</td>
+                            </tr>
+                            <tr>
+                                <th>10</th>
+                                <td></td>
+                                <td>Click "Can create database"</td>
+                            </tr>
+                            <tr>
+                                <th>11</th>
+                                <td></td>
+                                <td>Click OK</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                        <aside class="notes">
+                            <p>
+                                I normally use pgAdmin3 to create users and database as it's easier to check my work,
+                                but if you're following along and prefer something you can copy and paste into the
+                                terminal, I've included that.
+                            </p>
+                        </aside>
+                    </section>
+                    <section id="configuration-create-database">
+                        <h1>Create the database</h1>
+                        <figure>
+                            <figcaption><code>mix ecto.create</code> for new project</figcaption>
+                            <img alt="Top lines of mix ecto.create in new project compile fs application"
+                                 src="images/mix-ecto-create-uncompiled-top.png"
+                                 style="height: auto; width: 100%"/>
+                            <br/>
+                            <img alt="Bottom lines of mix.ecto.create in new project generate app and finally create the database"
+                                 src="images/mix-ecto-create-uncompiled-bottom.png.png"
+                                 style="height: auto; width: 100%"/>
+                        </figure>
+                        <figure>
+                            <figcaption><code>mix ecto.create</code> in built project</figcaption>
+                            <img alt="mix ecto.create in a pre-built project does not compile and only creates the database"
+                                 src="images/mix-ecto-create-compiled.png"
+                                 style="height: auto; width: 100%"/>
+                        </figure>
+                        <aside class="notes">
+                            <p>
+                                Now with the secrets outside of source control, we can create the database using the
+                                command that mix phoenix dot new (<code>mix phoenix.new</code>) gave us.
+                            </p>
+                            <p>
+                                You may wonder what's going on when you run the command: you'll see all this output
+                                about files being compiled and wonder why you're compiling to create a database.  Mix
+                                compiles the dependencies before creating the database because Ecto is a dependency
+                                of your project and so needs to be built for it to connect to PostgreSQL and create the
+                                database.
+                            </p>
+                            <p>
+                                If you run mix ecto dot create (<code>mix ecto.create</code>) in a project where the
+                                dependencies are already compiled, then you'll just get the bottom message.  Seeing
+                                the compilation message for ecto dot create (<code>ecto.create</code>) is a side-effect
+                                of it being the first mix command you ran.
                             </p>
                         </aside>
                     </section>
