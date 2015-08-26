@@ -6,8 +6,15 @@ use Mix.Config
 # The watchers configuration can be used to run external
 # watchers to your application. For example, we use it
 # with brunch.io to recompile .js and .css sources.
+dev_http_port = 4000
+prod_http_port = 80
+prod_https_port = 443
+dev_https_port = dev_http_port - prod_http_port + prod_https_port
+
 config :routing_securely_with_phoenix_framework, RoutingSecurelyWithPhoenixFramework.Endpoint,
-  https: [port: 4363],
+  force_ssl: [port: dev_https_port],
+  http: [port: dev_http_port],
+  https: [port: dev_https_port],
   debug_errors: true,
   code_reloader: true,
   cache_static_lookup: false,

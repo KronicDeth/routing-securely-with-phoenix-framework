@@ -7,7 +7,10 @@ use Mix.Config
 
 # Configures the endpoint
 config :routing_securely_with_phoenix_framework, RoutingSecurelyWithPhoenixFramework.Endpoint,
-  force_ssl: [hsts: true],
+  # HSTS (HTTP Strict Transport Security) will NOT rewrite any port besides 80 -> 443
+  # (see https://tools.ietf.org/html/rfc6797#section-8.3), so turn it off because only prod is on 80 and 443.
+  # force_ssl on its own will do the redirect, so no real need for HSTS.
+  force_ssl: [hsts: false],
   https: [certfile: "priv/tls/server-#{Mix.env}.crt",
           keyfile: "priv/tls/server-#{Mix.env}.key",
           # Allow for relative path for certfile and keyfile
