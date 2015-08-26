@@ -132,6 +132,9 @@
                         <li>
                             <a href="#/configuration">Configuration</a>
                         </li>
+                        <li>
+                            <a href="#/tls">TLS</a>
+                        </li>
                     </ol>
                 </section>
                 <section class="stack">
@@ -953,6 +956,465 @@ config :routing_securely_with_phoenix_framework, RoutingSecurelyWithPhoenixFrame
                         </aside>
                     </section>
                 </section>
+                <section class="stack">
+                    <section id="tls">
+                        <h1>TLS</h1>
+                        <ul>
+                            <li>
+                                <a href="#/tls-overview">Overview</a>
+                            </li>
+                            <li>
+                                <a href="#/tls-certificate-authority-key">Certificate Authority Key</a>
+                            </li>
+                            <li>
+                                <a href="#/tls-self-signing-certificate-authority">
+                                    Self-Signing Certificate Authority
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#/tls-self-signing-certificate-authority-distinguished-name">
+                                    Self-Signing Certificate Authority Distinguished Name
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#/tls-self-signed-certificate-authority-view">
+                                    Viewing your self-signed certificate
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#/tls-server-key">Server Key</a>
+                            </li>
+                            <li>
+                                <a href="#/tls-server-certificate-signing-request">
+                                    Server Certificate Signing Request
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#/tls-server-certificate-signing-request-distinguished-name">
+                                    Server Certificate Signing Request Distinguished Name
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#/tls-signed-server-certificate">
+                                    Signed Server Certificate
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#/tls-server-certificate-signing">
+                                    Signing Server Certificate Request
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#/tls-trust-self-signed-certificate-authority">
+                                    Trust Self-Signed Certificate Authority
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#/tls-fully-qualified-domain-setup">
+                                    Fully-qualified Domain Setup
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#/tls-testing">
+                                    Testing TLS Connection
+                                </a>
+                            </li>
+                        </ul>
+                    </section>
+                    <section id="tls-overview">
+                        <h1>Overview</h1>
+                        <ul>
+                            <li>Transport Layer Security</li>
+                            <li>Successor to SSL (Secure Socket Layer) 3.0</li>
+                            <li>TLS 1.0 was defined in 1999</li>
+                        </ul>
+                        <aside class="notes">
+                            <p>
+                                H-T-T-P-S should no longer use S-S-L.  When speaking about the encryption for H-T-T-P-S,
+                                you should say T-L-S now.
+                            </p>
+                            <p>
+                                Phoenix, through Plug has built-in support for T-L-S without the need for a reverse
+                                proxy like engine-X (<code>nginx</code>).
+                            </p>
+                        </aside>
+                    </section>
+                    <section id="tls-certificate-authority-key">
+                        <h1>Certificate Authority Key</h1>
+                        <table>
+                            <caption><code>openssl genrsa -des3 -out certificate-authority.key 4096</code></caption>
+                            <thead>
+                            <tr>
+                                <th>Option</th>
+                                <th>Argument</th>
+                                <th>Description</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td></td>
+                                <td>
+                                    <code>genrsa</code>
+                                </td>
+                                <td>Generate RSA key</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <code>-des3</code>
+                                </td>
+                                <td></td>
+                                <td>Password protect the private key</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <code>-out</code>
+                                </td>
+                                <td>
+                                    <code>certificate-authority.key</code>
+                                </td>
+                                <td>
+                                    Private Key file
+                                </td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td>4096</td>
+                                <td>Number of bits in RSA key</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                        <aside class="notes">
+                            <p>
+                                To start making our own certificate authority, we need to generate a private key for
+                                the certificate authority.
+                            </p>
+                            <p>
+                                Use your password manager to generate a long password for this private key.
+                            </p>
+                            <p>
+                                We'll choose 4096 bits to be extra careful.  The current recommendation is only 2048
+                                bits.
+                            </p>
+                        </aside>
+                    </section>
+                    <section id="tls-self-signing-certificate-authority">
+                        <h1>Self-Signing Certificate Authority</h1>
+                        <table>
+                            <caption>
+                                <code>openssl req -new -x509 -days 365 -key certificate-authority.key -out certificate-authority.crt -sha256</code>
+                            </caption>
+                            <thead>
+                            <tr>
+                                <th>Option</th>
+                                <th>Argument</th>
+                                <th>Description</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td></td>
+                                <td>
+                                    <code>req</code>
+                                </td>
+                                <td>X.509 Certificate Signing Request (CSR) Management</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <code>-new</code>
+                                </td>
+                                <td></td>
+                                <td>New Certificate Request</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <code>-x509</code>
+                                </td>
+                                <td></td>
+                                <td>Self-signed certificate</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <code>-days</code>
+                                </td>
+                                <td>
+                                    <code>365</code>
+                                </td>
+                                <td>Number of days certificate is valid</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <code>-key</code>
+                                </td>
+                                <td>
+                                    <code>certificate-authority.key</code>
+                                </td>
+                                <td>Input file name for private key used for signing</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <code>-out</code>
+                                </td>
+                                <td>
+                                    <code>certificate-authority.crt</code>
+                                </td>
+                                <td>
+                                    Output file for self-signed certificate
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <code>-sha256</code>
+                                </td>
+                                <td></td>
+                                <td>Sign using SHA256 instead of SHA1</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                        <aside class="notes">
+                            <p>
+                                Non-self-signed certificates usually last from 1 to 3 years.
+                            </p>
+                        </aside>
+                    </section>
+                    <section id="tls-self-signing-certificate-authority-distinguished-name">
+                        <h1>Self-Signing Certificate Authorithy Distinguished Name</h1>
+                        <img alt="Entering C,ST,L,O,CN, and emailAddress for distinguished name"
+                             class="stretch"
+                             src="images/self-signing-certificate-authorithy-distinguished-name.png">
+                    </section>
+                    <section id="tls-self-signed-certificate-authority-view">
+                        <h1>Viewing your self-signed certificate</h1>
+                        <h2><code>openssl x509 -in certificate-authority.crt -noout -text</code></h2>
+                        <img alt="Data stored in certificate-authority.pem"
+                             class="stretch"
+                             src="images/viewing-your-self-signed-certificate-authority.png">
+                        <aside class="notes">
+                            <p>
+                                It's a good idea to check your work, which you can do with the X-509 subcommand
+                                for <code>openssl</code>.
+                            </p>
+                            <p>
+                                You can see that the Issuer and the Subject have the same distinguished name, which
+                                is the hallmark of a self-signed certificate.
+                            </p>
+                        </aside>
+                    </section>
+                    <section id="tls-server-key">
+                        <h1>Server Key</h1>
+                        <code>openssl genrsa -out server-${MIX_ENV}.key 4096</code>
+                        <aside class="notes">
+                            <p>
+                                We'll generate a separate server key for each mix environment so that the server
+                                certificate only works for the domain for each mix environemnt and we'll be alerted
+                                if we start using the development or test URL with the wrong server.
+                            </p>
+                        </aside>
+                    </section>
+                    <section id="tls-server-certificate-signing-request">
+                        <h1>Server Certificate Signing Request</h1>
+                        <code>openssl req -new -key server-${MIX_ENV}.key -out server-${MIX_ENV}.csr</code>
+                        <aside class="notes">
+                            <p>
+                                Since the serer certificate is not self-signed, signing it is broken into two parts:
+                                (1) the request for the server's key to be signed and (2) the certificate authority
+                                actually doing the signing.
+                            </p>
+                            <p>
+                                This two-part process makes sense when you think of how real Certificate Authorities
+                                like Verisign have to sign your private key, but you don't want to send it to them to
+                                do that.
+                            </p>
+                        </aside>
+                    </section>
+                    <section id="tls-server-certificate-signing-request-distinguished-name">
+                        <h1>Server Certificate Signing Request Distinguished Name</h1>
+                        <img alt="Entering C,ST,L,O,CN, and emailAddress for distinguished name.  CN must match DNS name (dev.phoenix.localhost) of MIX_ENV server"
+                             class="stretch"
+                             src="images/server-certificate-signing-request-distinguished-name.png">
+                        <aside class="notes">
+                            <p>
+                                I'll use the same country, state, locality, organization and email address as with the
+                                self-signed certificate authority, but the Common Name for the server must match the
+                                address I'll use to connect to the server, so in this case I'm using dev dot
+                                phoenix dot localhost under the assumption that this is for <code>MIX_ENV=dev</code> and
+                                I'll setup an etc host entry for dev dot phoenix dot locahost.
+                            </p>
+                        </aside>
+                    </section>
+                    <section id="tls-server-certificate-signing">
+                        <h1>Signing Server Certificate Request</h1>
+                        <table>
+                            <caption>
+                                <code>openssl x509 -CA certificate-authority.crt  -CAcreateserial -CAkey certificate-authority.key -days 90 -in server-${MIX_ENV}.csr -out server-${MIX_ENV}.crt -req -sha256</code>
+                            </caption>
+                            <thead>
+                            <tr>
+                                <th>Option</th>
+                                <th>Argument</th>
+                                <th>Description</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td></td>
+                                <td>
+                                    <code>x509</code>
+                                </td>
+                                <td>Certificate display and signing utility</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <code>-CA</code>
+                                </td>
+                                <td>
+                                    The Certificate Authority certificate
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <code>-CAcreateserial</code>
+                                </td>
+                                <td></td>
+                                <td>
+                                    Create file for keeping track of CA issued certificate serial numbers if it does not
+                                    exist and assign this certificate the next serial number.
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <code>-CAkey</code>
+                                </td>
+                                <td>
+                                    <code>certificate-authority.key</code>
+                                </td>
+                                <td>Certificate Authority private Key for signing request</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <code>-days</code>
+                                </td>
+                                <td>
+                                    <code>90</code>
+                                </td>
+                                <td>Days the server certificate is valid</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <code>-in</code>
+                                </td>
+                                <td>
+                                    <code>server-${MIX_ENV}.csr</code>
+                                </td>
+                                <td>
+                                    Request to be signed
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <code>-out</code>
+                                </td>
+                                <td>
+                                    <code>server-${MIX_ENV}.crt</code>
+                                </td>
+                                <td>
+                                    Signed certificate output file
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <code>-req</code>
+                                </td>
+                                <td></td>
+                                <td>Sign a certificate request</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <code>-sha256</code>
+                                </td>
+                                <td></td>
+                                <td>Sign with SHA256 instead of SHA1</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </section>
+                    <section id="tls-trust-self-signed-certificate-authority">
+                        <h1>Trust Self-Signed Certificate Authority</h1>
+                        <h2>OSX</h2>
+                        <ol>
+                            <li>Open Keychain Access</li>
+                            <li>Click Plus</li>
+                            <li>Select <code>certificate-authority.crt</code></li>
+                            <li>Highlight the certificate</li>
+                            <li>Click i</li>
+                            <li>Expand Trust</li>
+                            <li>Change "When using this certificate" to Always Trust</li>
+                            <li>Close i Dialog</li>
+                            <li>Enter password to save changes</li>
+                        </ol>
+                        <aside class="notes">
+                            <p>
+                                The whole purpose of creating a self-signed certificate authority instead of
+                                a single self-signed server certificate, was so that only one certificate needed to be
+                                trusted for all environments.
+                            </p>
+                            <p>
+                                Trusting the certificate authority will turn the padlock from red to green and stop
+                                certificate warnings from your browser.
+                            </p>
+                        </aside>
+                    </section>
+                    <section id="tls-fully-qualified-domain-setup">
+                        <h1>Fully Qualified Domain Setup</h1>
+                        <ol>
+                            <li><code><pre>sudo vim /etc/hosts</pre></code></li>
+                            <li>Add <code><pre>127.0.0.1 dev.routing-securely-with-phoenix-framework.localhost</pre></code></li>
+                            <li>Add <code><pre>127.0.0.1 prod.routing-securely-with-phoenix-framework.localhost</pre></code></li>
+                            <li>Add <code><pre>127.0.0.1 test.routing-securely-with-phoenix-framework.localhost</pre></code></li>
+                            <li>Restart Browsers</li>
+                        </ol>
+                        <aside class="notes">
+                            <p>
+                                In order to use your server certificates, you'll need a way for their common names to
+                                point at your local server.
+                            </p>
+                            <p>
+                                To keep it simple, I'm just adding entries to slash etc slash hosts
+                                (<code>/etc/hosts</code>) instead of setting up local DNS.
+                            </p>
+                        </aside>
+                    </section>
+                    <section id="tls-testing">
+                        <h1>Testing TLS connection</h1>
+                        <ol>
+                            <li>
+                                <figure>
+                                    <figcaption>
+                                        Start Phoenix: <pre><code>mix phoenix.server</code></pre>
+                                    </figcaption>
+                                    <img alt="mix phoenix.server print cowboy URL"
+                                         src="images/cowboy-url.png"
+                                         style="height: auto; width: 100%"/>
+                                </figure>
+                            </li>
+                            <li>Open URL printed by Cowboy</li>
+                            <li>
+                                <figure>
+                                    <figcaption>Verify connection is private</figcaption>
+                                    <img alt="Padlock is green and connection is private"
+                                         src="images/private-connection.png"
+                                         style="height: auto; width: 100%">
+                                </figure>
+                            </li>
+                        </ol>
+                        <aside class="notes">
+                            <p>
+                                With the certificate authority trusted and phoenix server over TLS we have the green
+                                padlock and because we used to high bit count, there are no warnings from chrome that
+                                the certificate is weak.
+                            </p>
+                        </aside>
+                    </section>
+                </section>
                 <section>
                     <h1>Sources</h1>
                     <ul>
@@ -961,6 +1423,18 @@ config :routing_securely_with_phoenix_framework, RoutingSecurelyWithPhoenixFrame
                         </li>
                         <li>
                             <code>mix help phoenix.new</code>
+                        </li>
+                        <li>
+                            <a href="http://datacenteroverlords.com/2012/03/01/creating-your-own-ssl-certificate-authority/">Creating your own SSL Certificate Authority</a>
+                        </li>
+                        <li>
+                            <a href="http://web.mit.edu/crypto/openssl.cnf">MIT openssl configuration file</a>
+                        </li>
+                        <li>
+                            <a href="http://rcardon.free.fr/websign/download/api-x509-ext/be/cardon/asn1/x509/extensions/KeyUsage.html">Key Usage docs</a>
+                        </li>
+                        <li>
+                            Metasploit Pro
                         </li>
                     </ul>
                 </section>
