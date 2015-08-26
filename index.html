@@ -1019,6 +1019,26 @@ config :routing_securely_with_phoenix_framework, RoutingSecurelyWithPhoenixFrame
                                     Testing TLS Connection
                                 </a>
                             </li>
+                            <li>
+                                <a href="#/tls-configuration">
+                                    TLS Configuration
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#/tls-configuration-dev">
+                                    TLS <code>dev</code> Configuration
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#/tls-configuration-prod">
+                                    TLS <code>prod</code> Configuration
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#/tls-configuration-test">
+                                    TLS <code>test</code> Configuration
+                                </a>
+                            </li>
                         </ul>
                     </section>
                     <section id="tls-overview">
@@ -1383,6 +1403,62 @@ config :routing_securely_with_phoenix_framework, RoutingSecurelyWithPhoenixFrame
                             </p>
                         </aside>
                     </section>
+                    <section id="tls-configuration">
+                        <h1>TLS Configuration</h1>
+                        <img alt="config/config.exs TLS changes"
+                             src="images/tls-config-config-exs.png"
+                             style="height: auto; width: 100%"/>
+                        <aside class="notes">
+                            <p>
+                                We need to disable the default HTTP Strict Transport Security because it doesn't work
+                                with HTTPS ports other than 443 that are different than the HTTP port.
+                            </p>
+                            <p>
+                                The https setting needs to know where to find the private key and certificate for the
+                                server.  Using the OTP app setting allows the paths to be relative.
+                            </p>
+                            <p>
+                                The host in the url setting needs to match the Common Name used in the respective
+                                mix environments, so I just use Mix.env in the host name itself.
+                            </p>
+                        </aside>
+                    </section>
+                    <section id="tls-configuration-dev">
+                        <h1>TLS <code>dev</code> Configuration</h1>
+                        <img alt="config/dev.exs TLS changes"
+                             src="images/tls-config-dev-exs.png"
+                             style="height: auto; width: 100%"/>
+                        <aside class="notes">
+                            <p>
+                                For the redirect from HTTP to HTTPS to work, the force_ssl setting needs to know the
+                                HTTPS port, which means that setting is repeated here and for the https port setting
+                                itself, so I use variables to show the calculation based on the standard ports
+                                of 80 for http and 443 for https and the standard http port of 4000 for phoenix,
+                                which means a https port of 4363 to maintain the gap between 80 and 443.
+                            </p>
+                        </aside>
+                    </section>
+                    <section id="tls-configuration-prod">
+                        <h1>TLS <code>prod</code> Configuration</h1>
+                        <img alt="config/prod.exs TLS changes"
+                             src="images/tls-config-prod-exs.png"
+                             style="height: auto; width: 100%"/>
+                        <aside class="notes">
+                            <p>
+                                Prod follows the same pattern as dev, but without the need for the gap calculation since
+                                prod uses the standard ports for http and https.
+                            </p>
+                        </aside>
+                    </section>
+                    <section id="tls-configuration-test">
+                        <h1>TLS <code>test</code> Configuration</h1>
+                        <img alt="config/test.exs TLS changes"
+                             src="images/tls-config-test-exs.png"
+                             style="height: auto; width: 100%"/>
+                        <aside class="notes">
+                            Test follows the same pattern as dev.
+                        </aside>
+                    </section>
                     <section id="tls-testing">
                         <h1>Testing TLS connection</h1>
                         <ol>
@@ -1392,11 +1468,12 @@ config :routing_securely_with_phoenix_framework, RoutingSecurelyWithPhoenixFrame
                                         Start Phoenix: <pre><code>mix phoenix.server</code></pre>
                                     </figcaption>
                                     <img alt="mix phoenix.server print cowboy URL"
-                                         src="images/cowboy-url.png"
+                                         src="images/cowboy-urls.png"
                                          style="height: auto; width: 100%"/>
                                 </figure>
                             </li>
-                            <li>Open URL printed by Cowboy</li>
+                            <li>Open HTTP URL printed by Cowboy</li>
+                            <li>Verify redirected to HTTPS URL printed by Cowboy</li>
                             <li>
                                 <figure>
                                     <figcaption>Verify connection is private</figcaption>
@@ -1435,6 +1512,9 @@ config :routing_securely_with_phoenix_framework, RoutingSecurelyWithPhoenixFrame
                         </li>
                         <li>
                             Metasploit Pro
+                        </li>
+                        <li>
+                            <a href="https://meatherly.github.io/2015/05/11/phoenixauthentication">Phoenix app with authentication</a>
                         </li>
                     </ul>
                 </section>
