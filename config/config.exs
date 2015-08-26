@@ -7,11 +7,16 @@ use Mix.Config
 
 # Configures the endpoint
 config :routing_securely_with_phoenix_framework, RoutingSecurelyWithPhoenixFramework.Endpoint,
-  url: [host: "localhost"],
-  root: Path.dirname(__DIR__),
-  render_errors: [default_format: "html"],
+  force_ssl: [hsts: true],
+  https: [certfile: "priv/tls/server-#{Mix.env}.crt",
+          keyfile: "priv/tls/server-#{Mix.env}.key",
+          # Allow for relative path for certfile and keyfile
+          otp_app: :routing_securely_with_phoenix_framework],
   pubsub: [name: RoutingSecurelyWithPhoenixFramework.PubSub,
-           adapter: Phoenix.PubSub.PG2]
+           adapter: Phoenix.PubSub.PG2],
+  render_errors: [default_format: "html"],
+  root: Path.dirname(__DIR__),
+  url: [host: "#{Mix.env}.routing-securely-with-phoenix-framework.localhost"]
 
 # Configures Elixir's Logger
 config :logger, :console,
