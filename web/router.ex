@@ -16,7 +16,14 @@ defmodule RoutingSecurelyWithPhoenixFramework.Router do
   scope "/", RoutingSecurelyWithPhoenixFramework do
     pipe_through :browser # Use the default browser stack
 
-    get "/", PageController, :index
+    get "/registration", RegistrationController, :new
+    post "/registration", RegistrationController, :create
+
+    get "/", SessionController, :new
+    post "/login", SessionController, :create
+    get "/logout", SessionController, :delete
+
+    get "/pages", PageController, :index
   end
 
   # Other scopes may use custom stacks.
