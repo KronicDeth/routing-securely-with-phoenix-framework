@@ -138,6 +138,9 @@
                         <li>
                             <a href="#/authentication">Authentication</a>
                         </li>
+                        <li>
+                            <a href="#/csrf">CSRF</a>
+                        </li>
                     </ol>
                 </section>
                 <section class="stack">
@@ -2302,6 +2305,170 @@ end
                         </aside>
                     </section>
                 </section>
+                <section class="stack">
+                    <section id="#csrf">
+                        <h1>CSRF</h1>
+                        <ul>
+                            <li>
+                                <a href="#/csrf-definition">Overview</a>
+                            </li>
+                            <li>
+                                <a href="#/csrf-false-protections">False CSRF Protections</a>
+                            </li>
+                            <li>
+                                <a href="#/csrf-protections">CSRF Protections</a>
+                            </li>
+                            <li>
+                                <a href="#/csrf-token-in-forms">CSRF Token in Forms</a>
+                            </li>
+                            <li>
+                                <a href="#/csrf-verificaiton">CSRF Token Verification</a>
+                            </li>
+                            <li>
+                                <a href=#/csrf-same-origin-policy>Same Origin Policy</a>
+                            </li>
+                        </ul>
+                    </section>
+                    <section id="csrf-overview">
+                        <h1>CSRF</h1>
+                        <h2>Cross-Site Request Forgery</h2>
+                        <ol>
+                            <li>User is logged into goodsite.com</li>
+                            <li>User visits badsite.com</li>
+                            <li>badsite.com contains a link to goodsite.com/widgets/sell</li>
+                            <li>User's browser fetches link to goodsite.com using cookie from goodsite.com</li>
+                            <li>badsite.com has just sold in User's account on goodsite.com to attacker</li>
+                        </ol>
+                        <aside class="notes">
+                            <p>
+                                C-S-R-F stands for cross-site request forgery.  It happens when one site is able to
+                                force a user to execute actions on another site because browsers automatically send
+                                cookies to the respective sites.
+                            </p>
+                        </aside>
+                    </section>
+                    <section id="csrf-false-protections">
+                        <h1>False CSRF Protections</h1>
+                        <ul>
+                            <li>Secret Cookie</li>
+                            <li>Not accepting <code>GET</code> requests</li>
+                            <li>Multi-Step Transactions</li>
+                        </ul>
+                        <aside class="notes">
+                            <p>
+                                Having a secret cookie doesn't matter because all cookies are sent to the site that
+                                created them.
+                            </p>
+                            <p>
+                                Only allowing <code>DELETE</code>, <code>PATCH</code>, <code>POST</code>, and
+                                <code>PUT</code> requests and not <code>GET</code> requests would prevent links
+                                triggering CSRF, but a malicious site can easily construct <code>POST</code> requests
+                                using hidden form fields or javascript.
+                            </p>
+                            <p>
+                                Having a complex set of steps to complete a transaction, such may pages and forms to
+                                fill to do a bank transfer doesn't protect if the attacker and figure out the
+                                correct sequence of requests to fake those steps.
+                            </p>
+                            <p>
+                                Rewriting URLs would involve putting the user's session ID in the URL, which means that
+                                anything that saves the URL, such as the history, then has the user's session ID in it,
+                                which can be recovered by an attacker.
+                            </p>
+                        </aside>
+                    </section>
+                    <section id="csrf-protections">
+                        <h1>CSRF Protections</h1>
+                        <ul>
+                            <li><code>GET</code> requests MUST NOT change state</li>
+                            <li>No XSS vulnerabilities</li>
+                            <li>Double submit cookie in requests that change state</li>
+                        </ul>
+                        <aside class="notes">
+                            <p>
+                                It is your responsibility as a developer to not have <code>GET</code> requests change
+                                state.  In addition to malicious attackers, spiders for most search engine will follow
+                                <code>GET</code> links, but not other requests, so if you have a <code>GET</code>
+                                link that changes state, then a search engine spider can blinding start altering
+                                your application state.
+                            </p>
+                            <p>
+                                Right now, the application isn't vulnerable to cross-site scripting (XSS) because no
+                                input from one user is viewable by another user, but we'll cover X-S-S protections
+                                when we get to the chat.
+                            </p>
+                            <p>
+                                Using a unique token for each form is the current standard for protecting forms in
+                                web frameworks including DJango, Ruby on Rails, and Phoenix.
+                            </p>
+                        </aside>
+                    </section>
+                    <section id="csrf-token-in-forms">
+                        <h1>CSRF Token in Forms</h1>
+                        <pre><code data-trim>
+&lt;h3&gt;Registration&lt;/h3&gt;
+&lt;%= form_for @changeset, registration_path(@conn, :create), fn f -&gt; %&gt;                            
+                        </code></pre>
+                        <pre><code data-trim>
+&lt;form accept-charset="UTF-8" action="/registration" method="post"&gt;
+    &lt;input name="_csrf_token" type="hidden" value="e3JoLCxfDyBXFHYaNVgjOwEeQx4uNgAA000tv4wt1p1bv4wOMVtHiQ=="&gt;
+                        </code></pre>
+                        <aside class="notes">
+                            <p>
+                                We've actually already enabled CSRF protection in our forms by using the
+                                <code>form_for</code> function, which adds a hidden input for underscore C-S-R-F
+                                underscore token (<code>_csrf_token</code>)
+                            </p>
+                        </aside>
+                    </section>
+                    <section i="csrf-verification">
+                        <h1>CSRF Token Verification</h1>
+                        <h2><code>_csrf_token</code> (param) == <code>_csrf_token</code> (session)</h2>
+                        <aside class="notes">
+                            <p>
+                                The CSRF token is verified by comparing the token submitted in the request with the
+                                token storied in the session.
+                            </p>
+                            <p>
+                                The CSRF token in the session can be trusted even when stored in a cookie (as is the
+                                default) because the cookie is signed and encrypted so that the user cannot tamper
+                                with it.
+                            </p>
+                            <p>
+                                Each GET request for a form included a new CSRF token and modifies the session cookie
+                                so it has that same CSRF token in it.  The reason an attacker cannot read the
+                                the form to recover the CSRF token a resubmit with the updated cookie due to the same
+                                origin policy.
+                            </p>
+                        </aside>
+                    </section>
+                    <section id="csrf-same-origin-policy">
+                        <h1>Same Origin Policy</h1>
+                        <h2><a href="https://tools.ietf.org/html/rfc6454#section-4">RFC 6454</a></h2>
+                        <ul>
+                            <li>Protocol</li>
+                            <li>Host</li>
+                            <li>Port</li>
+                        </ul>
+                        <aside class="notes">
+                            <p>
+                                Web browsers ensure that requests from one page to another are only allowed if the
+                                protocol, host, and port match.
+                            </p>
+                            <p>
+                                This prevents resources from the http version of a site accessing the secure https
+                                version of a site; google.com accessing your bank's site; and two internal apps
+                                running on different ports on your companies intranet from accessing each other.
+                            </p>
+                            <p>
+                                Without same origin, CSRF couldn't be prevented with storing the token in both
+                                a resource the form and the cookie because the attacker could read the form, fill it
+                                in (with the hidden CSRF token) and the browser would send along the cookies on the
+                                attacker's behalf.
+                            </p>
+                        </aside>
+                    </section>
+                </section>
                 <section>
                     <h1>Sources</h1>
                     <ul>
@@ -2325,6 +2492,18 @@ end
                         </li>
                         <li>
                             <a href="https://meatherly.github.io/2015/05/11/phoenixauthentication">Phoenix app with authentication</a>
+                        </li>
+                        <li>
+                            <a href="https://www.owasp.org/index.php/Cross-Site_Request_Forgery_(CSRF)">Cros-Site Request Forgery (CSRF)</a>
+                        </li>
+                        <li>
+                            <a href="https://www.owasp.org/index.php/CSRF_Prevention_Cheat_Sheet">CSRF Prevention Cheat Sheet</a>
+                        </li>
+                        <li>
+                            <a href="https://en.wikipedia.org/wiki/Same-origin_policy">Same-origin policy</a>
+                        </li>
+                        <li>
+                            <a href="https://tools.ietf.org/html/rfc6454#section-4">RFC 6454</a>
                         </li>
                     </ul>
                 </section>
