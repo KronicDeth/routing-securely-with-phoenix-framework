@@ -135,6 +135,9 @@
                         <li>
                             <a href="#/tls">TLS</a>
                         </li>
+                        <li>
+                            <a href="#/authentication">Authentication</a>
+                        </li>
                     </ol>
                 </section>
                 <section class="stack">
@@ -1488,6 +1491,813 @@ config :routing_securely_with_phoenix_framework, RoutingSecurelyWithPhoenixFrame
                                 With the certificate authority trusted and phoenix server over TLS we have the green
                                 padlock and because we used to high bit count, there are no warnings from chrome that
                                 the certificate is weak.
+                            </p>
+                        </aside>
+                    </section>
+                </section>
+                <section class="stack">
+                    <section id="authentication">
+                        <h1>Authentication</h1>
+                        <ul>
+                            <li>
+                                <a href="#/authentication-providers">Providers</a>
+                            </li>
+                            <li>
+                                <a href="#/authentication-generate-user-model">
+                                    <code>User</code> model
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#/authentication-user-migration">User Migration</a>
+                            </li>
+                            <li>
+                                <a href="#/authentication-user-schema">User Schema</a>
+                            </li>
+                            <li>
+                                <a href="#/authentication-user-changeset">User Changeset</a>
+                            </li>
+                            <li>
+                                <a href="#/authentication-user-password-hashing">User password hashing</a>
+                            </li>
+                            <li>
+                                <a href="#/authentication-user-registration-routes">User Registration Routers</a>
+                            </li>
+                            <li>
+                                <a href="#/authentication-user-registration-controller">User Registration Controller</a>
+                            </li>
+                            <li>
+                                <a href="#/authentication-user-registration-controller-new">
+                                    User Registration Controller <code>new</code>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#/authentication-user-view">User View</a>
+                            </li>
+                            <li>
+                                <a href="#/authentication-user-new-template">
+                                    User <code>new</code> Template
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#/authentication-user-registration-controller-create">
+                                    User Registration Controller <code>create</code>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#/authentication-page-routes">Page Routes</a>
+                            </li>
+                            <li>
+                                <a href="#/authentication-page-controller-authentication">
+                                    Page Controller Authentication
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#/authentication-authenticate-plug">Authenticate Plug</a>
+                            </li>
+                            <li>
+                                <a href="#/authentication-session-routes">Session Routes</a>
+                            </li>
+                            <li>
+                                <a href="#/authentication-session-controller">Session Controller</a>
+                            </li>
+                            <li>
+                                <a href="#/authentication-session-controller-new">
+                                    Session Controller <code>new</code>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#/authentication-session-view">Session View</a>
+                            </li>
+                            <li>
+                                <a href="#/authentication-session-new-template">
+                                    Session <code>new</code> Template
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#/authentication-session-controller-create">
+                                    Session Controller <code>create</code>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#/authentication-session-status">Session Status</a>
+                            </li>
+                            <li>
+                                <a href="#/authentication-session-controller-delete">
+                                    Session Controller <code>delete</code>
+                                </a>
+                            </li>
+                        </ul>
+                    </section>
+                    <section id="authentication-providers">
+                        <h1>Authentication Providers</h1>
+                        <h2>Don't store passwords if you don't have</h2>
+                        <ul>
+                            <li>
+                                Allow uses to login with OAuth:
+                                <ul>
+                                    <li>
+                                        <a href="https://developers.facebook.com/docs/facebook-login/login-flow-for-web/v2.4">Facebook</a>
+                                    </li>
+                                    <li>
+                                        <a href="https://developer.github.com/guides/basics-of-authentication/">Github</a>
+                                    </li>
+                                    <li>
+                                        <a href="https://developers.google.com/identity/sign-in/web/sign-in">Google</a>
+                                    </li>
+                                    <li>
+                                        <a href="https://dev.twitter.com/web/sign-in">Twitter</a>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li>
+                                Allow uses to login with SAML:
+                                <ul>
+                                    <li>
+                                        <a href="http://developer.okta.com/docs/guides/saml_guidance.html">Okta</a>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li>Store their password</li>
+                        </ul>
+                        <aside class="notes">
+                            <p>
+                                If you are making an application on the internet, please consider NOT having your users
+                                create a new account and password for your site.  Then you site just becomes another
+                                site that can have a password breach.
+                            </p>
+                            <p>
+                                Instead, let password security be someone else's problem: use OAuth to allow sign-in
+                                from social networks or use SAML with Okta and allow users to login with their private
+                                company ActiveDirectory credentials.
+                            </p>
+                            <p>
+                                If none of these options work for you or you want a fallback in case your users don't
+                                have accounts at the other providers, then you can implement passwords in your
+                                application.
+                            </p>
+                            <p>
+                                This code for this section is based on Michael Eatherly's
+                                "Phoenix app with authentication" from May 11th 2015.  It has been updated for changes
+                                in newer versions of Phoenix and some stylistic changes.
+                            </p>
+                        </aside>
+                    </section>
+                    <section id="authentication-generate-user-model">
+                        <h1><code>User</code> model</h1>
+                        <table>
+                            <caption>
+                                <pre><code>mix phoenix.gen.model User users name password_hash</code></pre>
+                            </caption>
+                            <thead>
+                            <tr>
+                                <th>Argument</th>
+                                <th>Description</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td>
+                                    <code>User</code>
+                                </td>
+                                <td>
+                                    Module name
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <code>users</code>
+                                </td>
+                                <td>
+                                    Table name
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <code>name</code>
+                                </td>
+                                <td>Column name</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <code>password_hash</code>
+                                </td>
+                                <td>Column name</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                        <img src="images/gen-user-model.png"
+                             style="height: auto; width: 100%"/>
+                        <aside class="notes">
+                            <p>Phoenix has generators for creating models.</p>
+                        </aside>
+                    </section>
+                    <section id="authentication-user-migration">
+                        <h1>User Migration</h1>
+                        <pre><code class="elixir">
+defmodule RoutingSecurelyWithPhoenixFramework.Repo.Migrations.CreateUser do
+  use Ecto.Migration
+
+  def change do
+    create table(:users) do
+      add :name, :string
+      add :password_hash, :string
+
+      timestamps
+    end
+
+    create unique_index(:users, [:name])
+  end
+end
+                        </code></pre>
+                        <aside class="notes">
+                            <p>
+                                We create a bare minimum user with a unique name and hashed-password.
+                            </p>
+                            <p>
+                                Note that I called the field password_hash because it's a hashed password it's not
+                                encrypted.  A lot of example code confuses encrypted passwords, which can be unencrypted
+                                and recovered with hashed passwords, which can't be recovered.  Hash is one-way.
+                                Hash password are only cracked by finding the input string that happens to make the
+                                same hash as the hash on file.
+                            </p>
+                            <p>
+                                If you ever have to choice between encrypting or hashing passwords, choose hashing
+                                passwords and just have users reset their passwords instead of having unencryptable
+                                passwords that you can send back to the user when their forget their password.
+                            </p>
+                            <p>
+                                If you can unencrypt a password that means that can attacker that gets access to
+                                your unencryption key can also read all your users' passwords.
+                            </p>
+                        </aside>
+                    </section>
+                    <section id="authentication-user-schema">
+                        <h1>User Schema</h1>
+                        <pre><code class="elixir" data-trim>
+defmodule RoutingSecurelyWithPhoenixFramework.User do
+  use RoutingSecurelyWithPhoenixFramework.Web, :model
+
+  schema "users" do
+    field :name, :string
+    field :password, :string, virtual: true
+    field :password_confirmation, :string, virtual: true
+    field :password_hash, :string
+
+    timestamps
+  end
+                        </code></pre>
+                        <aside class="notes">
+                            <p>
+                                <code>schema</code> is a macro for Ecto models that define the type of each field in the
+                                Ecto model.
+                            </p>
+                            <p>
+                                The fields aren't automatically inferred from the database because (1) Elixir in general
+                                believes in more explicitness and (2) an Ecto model is more separate from the database:
+                                it allows for form-only <code>virtual</code> fields, such as <code>password</code> and
+                                <code>password_confirmation</code> as seen here.
+                            </p>
+                            <p>
+                                In theory, you can have two Ecto models that point to the same database table and only
+                                they can have different real and virtual fields exposed from the database columns.
+                            </p>
+                        </aside>
+                    </section>
+                    <section id="authentication-user-changeset">
+                        <h1>User Changeset</h1>
+                        <pre><code class="elixir stretch">
+  @minimum_password_length 16
+  @optional_fields ~w()
+  @required_fields ~w(name password password_confirmation)
+
+  @doc """
+  Creates a changeset based on the `model` and `params`.
+
+  If no params are provided, an invalid changeset is returned
+  with no validation performed.
+  """
+  def changeset(model, params \\ :empty) do
+    model
+    |> cast(params, @required_fields, @optional_fields)
+    |> validate_length(:password, min: @minimum_password_length)
+    |> validate_length(:password_confirmation, min: @minimum_password_length)
+    |> validate_confirmation(:password)
+    |> unique_constraint(:name)
+  end
+                        </code></pre>
+                        <aside class="notes">
+                            <p>
+                                Ecto separates the model, which is a simple Struct from data about whether the params
+                                the user passed are valid and what changes need to be persisted to the database in
+                                an Ecto dot Changeset (<code>Ecto.Changeset</code>).
+                            </p>
+                            <p>
+                                <code>cast</code> does 3 things: (1) it errors out if a required field is missing in
+                                <code>params</code>; (2) it only allows required and optional fields to be copied into
+                                the changeset; (3) it converts the allowed params to the type given in the schema.
+                            </p>
+                            <p>
+                                Validations are applied to the changeset and errors are recorded in the returned
+                                changeset, so they are just functions, not a DSL.
+                            </p>
+                            <p>
+                                Instead of validating for uniqueness with a SELECT in the database,
+                                <code>unique_constraint</code> annotates the changeset, so if there is unique index
+                                error from the database, it is transformed back to a validation error.  This is more
+                                efficient than validating the uniqueness with SELECT when the call happens because it
+                                eliminates a trip to the database and isn't prone to the race conditions of the SELECT
+                                either.
+                            </p>
+                        </aside>
+                    </section>
+                    <section id="authentication-user-password-hashing">
+                        <h1>User password hashing</h1>
+                        <pre><code class="elixir stretch">
+  @doc """
+  Generates a password for the user changeset and stores it to the changeset as encrypted_password.
+  """
+  def generate_password(changeset) do
+    put_change(changeset, :password_hash, Comeonin.Bcrypt.hashpwsalt(changeset.params["password"]))
+  end
+end
+                        </code></pre>
+                        <aside class="notes">
+                            <p>
+                                As a general rule one should never write their own encryption, so I'm taking that advise
+                                and using the <code>comeonin</code> package to use Bcrypt, which is a known hashing
+                                algorithm, to salt each password and hash it for me.
+                            </p>
+                            <p>
+                                Salting adds a randomly generate string to the user's password before hashing, which
+                                does 2 things: (1) if two users have the same password, it's stops them from having the
+                                same password hash and (2) it makes the passwords harder to crack in bulk because an
+                                attacker needs to start over for each salt.
+                            </p>
+                        </aside>
+                    </section>
+                    <section id="authentication-user-registration-routes">
+                        <h1>User Registration Routes</h1>
+                        <pre><code class="elixir" data-trim>
+defmodule RoutingSecurelyWithPhoenixFramework.Router do
+  use RoutingSecurelyWithPhoenixFramework.Web, :router
+
+  scope "/", RoutingSecurelyWithPhoenixFramework do
+    pipe_through :browser # Use the default browser stack
+
+    get "/registration", RegistrationController, :new
+    post "/registration", RegistrationController, :create
+  end
+end
+                        </code></pre>
+                        <aside class="notes">
+                            <p>
+                                For this presentation, we'll limit the user controller to just registering new users,
+                                so it'll be the <code>RegistrationController</code> and only have routes for getting
+                                the new user form and submitted the form to create the user.
+                            </p>
+                        </aside>
+                    </section>
+                    <section id="authentication-user-registration-controller">
+                        <h1>User Registration Controller</h1>
+                        <pre><code class="elixir" data-trim>
+defmodule RoutingSecurelyWithPhoenixFramework.RegistrationController do
+  use RoutingSecurelyWithPhoenixFramework.Web, :controller
+
+  alias RoutingSecurelyWithPhoenixFramework.User
+
+  plug :scrub_params, "user" when action in [:create]
+                        </code></pre>
+                        <aside class="notes">
+                            <p>
+                                We'll use the
+                                <a href="http://hexdocs.pm/phoenix/Phoenix.Controller.html#scrub_params/2">scrub_params plug</a>
+                                to convert empty strings to nils recursively in the user param.
+                            </p>
+                        </aside>
+                    </section>
+                    <section id="authentication-user-registration-controller-new">
+                        <h1>User Registration Controller <code>new</code></h1>
+                        <pre><code class="elixir stretch" data-trim>
+  def new(conn, _params) do
+    changeset = User.changeset(%User{})
+    render conn, changeset: changeset
+  end
+end
+                        </code></pre>
+                        <aside class="notes">
+                            <p>
+                                The <code>new</code> action just renders a changeset for the form.  A changeset is used
+                                instead of a <code>User</code> Struct because changesets can hold things like validation
+                                errors and previous input, so this way an empty new form and a new from from a failed
+                                create can use the same form.
+                            </p>
+                        </aside>
+                    </section>
+                    <section id="authentication-user-view">
+                        <h1>User View</h1>
+                        <pre><code class="elixir stretch" data-trim>
+defmodule RoutingSecurelyWithPhoenixFramework.RegistrationView do
+  use RoutingSecurelyWithPhoenixFramework.Web, :view
+end
+                        </code></pre>
+                        <aside class="notes">
+                            <p>
+                                Using Web view is all that's required for <code>RegistrationView</code> because we're
+                                following the standard naming convention for templates.
+                            </p>
+                        </aside>
+                    </section>
+                    <section id="authentication-user-new-template">
+                        <h1>User <code>new</code> Template</h1>
+                        <pre><code class="stretch" data-trim>
+&lt;h3&gt;Registration&lt;/h3&gt;
+&lt;%= form_for @changeset, registration_path(@conn, :create), fn f -&gt; %&gt;
+&lt;%= if f.errors != [] do %&gt;
+&lt;div class="alert alert-danger"&gt;
+    &lt;p&gt;Oops, something went wrong! Please check the errors below:&lt;/p&gt;
+    &lt;ul&gt;
+        &lt;%= for {attr, message} &lt;- f.errors do %&gt;
+        &lt;li&gt;&lt;%= humanize(attr) %&gt; &lt;%= message %&gt;&lt;/li&gt;
+        &lt;% end %&gt;
+    &lt;/ul&gt;
+&lt;/div&gt;
+&lt;% end %&gt;
+
+&lt;div class="form-group"&gt;
+    &lt;label&gt;Name&lt;/label&gt;
+    &lt;%= text_input f, :name, class: "form-control" %&gt;
+&lt;/div&gt;
+
+&lt;div class="form-group"&gt;
+    &lt;label&gt;Password&lt;/label&gt;
+    &lt;%= password_input f, :password, class: "form-control" %&gt;
+&lt;/div&gt;
+
+&lt;div class="form-group"&gt;
+    &lt;label&gt;Password Confirmation&lt;/label&gt;
+    &lt;%= password_input f, :password_confirmation, class: "form-control" %&gt;
+&lt;/div&gt;
+
+&lt;div class="form-group"&gt;
+    &lt;%= submit "Register", class: "btn btn-primary" %&gt;
+    &lt;%= link("Login", to: session_path(@conn, :new), class: "btn btn-success pull-right") %&gt;
+&lt;/div&gt;
+&lt;% end %&gt;
+                        </code></pre>
+                        <aside class="notes">
+                            <p>
+                                We use the <code>form_for</code> function with the passed in <code>changeset</code>.
+                                Passed in variables are called assigns and accessible using the <code>@</code> macro.
+                                They are not the same as module attributes, but can be though of as similar because
+                                they should be treated as constant for the template.
+                            </p>
+                            <p>
+                                Pay special attention that the percent equals form of the E-E-X tags MUST be used for
+                                anything that outputs HTML code.  This includes non-obvious macros like <code>if</code>
+                                and <code>for</code>.
+                            </p>
+                            <p>
+                                All the CSS class come from bootstrap, which Phoenix uses by default.
+                            </p>
+                        </aside>
+                    </section>
+                    <section id="authentication-user-registration-controller-create">
+                        <h1>User Registration Controller <code>create</code></h1>
+                        <pre><code class="elixir stretch" data-trim>
+  def create(conn, %{"user" => user_params}) do
+    changeset = User.changeset(%User{}, user_params)
+
+    if changeset.valid? do
+      case changeset |> User.generate_password |> Repo.insert do
+        {:ok, user} ->
+          conn
+          |> put_flash(:info, "Successfully registered and logged in")
+          |> put_session(:current_user, user)
+          |> redirect(to: page_path(conn, :index))
+        {:error, changeset} ->
+          render conn, "new.html", changeset: changeset
+      end
+    else
+      render conn, "new.html", changeset: changeset
+    end
+  end
+                        </code></pre>
+                        <aside class="notes">
+                            <p>
+                                When the new form is submitted it goes to the <code>create</code> action in the
+                                <code>RegistrationController</code>
+                            </p>
+                            <p>
+                                If the changeset is valid, because the name is present and the password and
+                                password_confirmation match and are long enough, then use them to generate the
+                                password_hash and insert the user into the repo.
+                            </p>
+                            <p>
+                                But, the insert can fail if the unique constraint is violated, so we check for errors
+                                from the insert in the <code>case</code> macro.
+                            </p>
+                            <p>
+                                If there's a validation or a constraint error, then we render the new form with
+                                the errors.
+                            </p>
+                        </aside>
+                    </section>
+                    <section id="authentication-page-routes">
+                        <h1>Page Routes</h1>
+                        <pre><code class="elixir stretch" data-trim>
+defmodule RoutingSecurelyWithPhoenixFramework.Router do
+  scope "/", RoutingSecurelyWithPhoenixFramework do
+    get "/pages", PageController, :index
+  end
+end
+                        </code></pre>
+                        <aside class="notes">
+                            <p>
+                                Once logged in, we need a landing page, so we move the <code>PageController</code> route
+                                from slash (<code>/</code>) to slash pages (<code>/pages</code>).
+                            </p>
+                        </aside>
+                    </section>
+                    <section id="authentication-page-controller-authentication">
+                        <h1>Page Controller Authentication</h1>
+                        <pre><code class="elixir stretch" data-trim>
+defmodule RoutingSecurelyWithPhoenixFramework.PageController do
+  plug RoutingSecurelyWithPhoenixFramework.Plug.Authenticate
+end
+                        </code></pre>
+                        <aside class="notes">
+                            <p>
+                                We only want logged in users to see the pages, so we'll use a plug to check that users
+                                are authenticated.
+                            </p>
+                        </aside>
+                    </section>
+                    <section id="authentication-authenticate-plug">
+                        <h1>Authenticate Plug</h1>
+                        <pre><code class="elixir stretch" data-trim>
+defmodule RoutingSecurelyWithPhoenixFramework.Plug.Authenticate do
+  import RoutingSecurelyWithPhoenixFramework.Router.Helpers
+
+  def init(opts), do: opts
+
+  def call(conn, _opts) do
+    case Plug.Conn.get_session(conn, :current_user) do
+      nil ->
+        conn
+        |> Phoenix.Controller.put_flash(:error, 'You need to be signed in to view this page')
+        |> Phoenix.Controller.redirect(to: session_path(conn, :new))
+        |> Plug.Conn.halt
+      current_user ->
+        Plug.Conn.assign(conn, :current_user, current_user)
+    end
+  end
+end
+                        </code></pre>
+                        <aside class="notes">
+                            <p>
+                                Plugs can either be functions or Modules.  Modules have the benefit of allowing options to
+                                be passed to the plug macro call.  Here we're not using the <code>opts</code>, so they just
+                                pass through unused in <code>init/2</code> to maintain the signature and are prefixed with
+                                underscore (<code>_opts</code>) to let the compiler know we expect to not use the variable
+                                in <code>call</code>.
+                            </p>
+                            <p>
+                                The Plug dot conn dot halt (<code>Plug.Conn.halt</code>) is important as it stops the
+                                pipeline of plugs, including the action from running.  Without it, you'll get a
+                                a plug dot conn dot already sent error (<code>Plug.Conn.AlreadySentError</code>).  Being
+                                able to mark a conn as halted is what elevates plug pipelines above the level of pipe
+                                arrow (<code>|></code>) pipelines in standard Elixir: you can stop a pipeline when there
+                                is an error and not have to do <code>:ok</code> and <code>:error</code> cases for every
+                                later function in the pipeline.
+                            </p>
+                        </aside>
+                    </section>
+                    <section id="authentication-session-routes">
+                        <h1>Session Routes</h1>
+                        <pre><code class="elixir stretch" data-trim>
+defmodule RoutingSecurelyWithPhoenixFramework.Router do
+  scope "/", RoutingSecurelyWithPhoenixFramework do
+    get "/", SessionController, :new
+    post "/login", SessionController, :create
+    get "/logout", SessionController, :delete
+  end
+end
+                        </code></pre>
+                        <aside class="notes">
+                            <p>
+                                Registering uses are automatically signed in, but users need a way to login when returning to
+                                the site (and logout on demand).
+                            </p>
+                            <p>
+                                There is no unprotected pages besides registration, so slash (<code>/</code>) will now log
+                                to the login page.
+                            </p>
+                        </aside>
+                    </section>
+                    <section id="authentication-session-controller">
+                        <h1>Session Controller</h1>
+                          <pre><code class="elixir stretch" data-trim>
+defmodule RoutingSecurelyWithPhoenixFramework.SessionController do
+  use RoutingSecurelyWithPhoenixFramework.Web, :controller
+
+  alias RoutingSecurelyWithPhoenixFramework.User
+
+  plug :scrub_params, "user" when action in [:create]
+                          </code></pre>
+                        <aside class="notes">
+                            <p>
+                                Like <code>RegistrationController</code>, we're using <code>scrub_params</code> to convert
+                                empty strings to <code>nil</code> for <code>create</code>.
+                            </p>
+                        </aside>
+                    </section>
+                    <section id="authentication-session-controller-new">
+                        <h1>Session Controller <code>new</code></h1>
+                        <pre><code class="elixir stretch" data-trim>
+  def new(conn, _params) do
+    render conn, changeset: User.changeset(%User{})
+  end
+                        </code></pre>
+                        <aside class="notes">
+                            <p>
+                                The <code>new</code> code uses changeset just like the registration controller's
+                                <code>new</code> to allow for form errors.
+                            </p>
+                        </aside>
+                    </section>
+                    <section id="authentication-session-view">
+                        <h1>Session View</h1>
+                        <pre><code class="elixir stretch" data-trim>
+defmodule RoutingSecurelyWithPhoenixFramework.SessionView do
+  use RoutingSecurelyWithPhoenixFramework.Web, :view
+end
+                        </code></pre>
+                        <aside class="notes">
+                            <p>
+                                Once again, we're using HTML, so the <code>SessionView</code> is just boiler plate.
+                            </p>
+                            <p>
+                                I swear having a separate view and template is useful, but it's mostly used for JSON
+                                views in my experience.
+                            </p>
+                        </aside>
+                    </section>
+                    <section id="authentication-session-new-template">
+                        <h1>Session <code>new</code> Template</h1>
+                        <pre><code class="stretch" data-trim>
+&lt;h3&gt;Login&lt;/h3&gt;
+&lt;%= form_for @changeset, session_path(@conn, :create), fn f -&gt; %&gt;
+&lt;%= if f.errors != [] do %&gt;
+&lt;div class="alert alert-danger"&gt;
+    &lt;p&gt;Oops, something went wrong! Please check the errors below:&lt;/p&gt;
+    &lt;ul&gt;
+        &lt;%= for {attr, message} &lt;- f.errors do %&gt;
+        &lt;li&gt;&lt;%= humanize(attr) %&gt; &lt;%= message %&gt;&lt;/li&gt;
+        &lt;% end %&gt;
+    &lt;/ul&gt;
+&lt;/div&gt;
+&lt;% end %&gt;
+
+&lt;div class="form-group"&gt;
+    &lt;label&gt;Name&lt;/label&gt;
+    &lt;%= text_input f, :name, class: "form-control" %&gt;
+&lt;/div&gt;
+
+&lt;div class="form-group"&gt;
+    &lt;label&gt;Password&lt;/label&gt;
+    &lt;%= password_input f, :password, class: "form-control" %&gt;
+&lt;/div&gt;
+
+&lt;div class="form-group"&gt;
+    &lt;%= submit "Login", class: "btn btn-primary" %&gt;
+    &lt;%= link("Sign Up", to: registration_path(@conn, :new), class: "btn btn-success pull-right") %&gt;
+&lt;/div&gt;
+&lt;% end %&gt;                            
+                        </code></pre>
+                        <aside class="notes">
+                            <p>
+                                It's pretty much the same form as for registration, just without the password
+                                confirmation.
+                            </p>
+                        </aside>
+                    </section>
+                    <section id="authentication-session-controller-create">
+                        <h1>Session Controller <code>create</code></h1>
+                        <pre><code class="elixir stretch" data-trim>
+  def create(conn, %{"user" => user_params}) do
+    if is_nil(user_params["name"]) do
+      nil
+    else
+      Repo.get_by(User, name: user_params["name"])
+    end
+    |> sign_in(user_params["password"], conn)
+  end
+  # Private Functions
+
+  @sign_in_error "Name or password are incorrect."
+
+  defp sign_in(user, password, conn) when is_nil(user) do
+    conn
+    |> put_flash(:error, @sign_in_error)
+    |> render "new.html", changeset: User.changeset(%User{})
+  end
+
+  defp sign_in(user, password, conn) when is_map(user) do
+    if Comeonin.Bcrypt.checkpw(password, user.password_hash) do
+      conn
+      |> put_session(:current_user, user)
+      |> put_flash(:info, "You are now signed in.")
+      |> redirect(to: page_path(conn, :index))
+    else
+      conn
+      |> put_flash(:error, @sign_in_error)
+      |> render "new.html", changeset: User.changeset(%User{})
+    end
+  end
+                        </code></pre>
+                        <aside class="notes">
+                            <p>
+                                When the <code>new</code> form is submitted, <code>create</code> will attempt to login
+                                the user.
+                            </p>
+                            <p>
+                                <code>create</code> only looks up the user if the name is set, saving a trip to the
+                                database.
+                            </p>
+                            <p>
+                                The retrieved user or nil is then passed to <code>sign_in</code>, which uses a guard
+                                to show an error when the user is nil, which handles both the user name being nil and
+                                the user not being found in the database.
+                            </p>
+                            <p>
+                                If the user is found in the database, when come on in's bcrypt support is used to
+                                check the password against the stored password hash. If the password is correct, then
+                                the users is signed in and redirected to the landing page.
+                            </p>
+                            <p>
+                                If the password is incorrect, an error is shown by redirecting to the new form.
+                            </p>
+                            <p>
+                                Take note of the sign in error module attribute (<code>@sign_in_error</code>).  I make
+                                sure to use same error whether the name and/or password is incorrect.  I don't want
+                                to disclose if the name is correct, but the password is wrong as that allows for user
+                                enumeration, which can help with other attacks.
+                            </p>
+                            <p>
+                                However, for this specific application, because there is open registration, users can
+                                be enumerated by trying names and seeing if they are already taken.
+                            </p>
+                        </aside>
+                    </section>
+                    <section id="authentication-session-status">
+                        <h1>Session Status</h1>
+                        <pre><code class="stretch" data-trim>
+&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+  &lt;body&gt;
+    &lt;nav class="navbar navbar-inverse navbar-fixed-top" role="navigation"&gt;
+      &lt;div class="container"&gt;
+       &lt;div id="navbar" class="navbar-collapse collapse"&gt;
+          &lt;div class="navbar-form navbar-right"&gt;
+          &lt;%= case @conn.assigns[:current_user] do %&gt;
+          &lt;%    nil -&gt; %&gt;
+            &lt;%= link "Login", class: "btn btn-success", role: "button", to: session_path(@conn, :new) %&gt;
+          &lt;%    current_user -&gt; %&gt;
+            &lt;span class="label label-info"&gt;
+              &lt;%= current_user.name %&gt;
+            &lt;/span&gt;
+            &lt;%= link "Logout", class: "btn btn-danger", role: "button", to: session_path(@conn, :delete) %&gt;
+          &lt;% end %&gt;
+          &lt;/div&gt;
+        &lt;/div&gt;&lt;!--/.navbar-collapse --&gt;
+      &lt;/div&gt;
+    &lt;/nav&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+                        </code></pre>
+                        <aside class="notes">
+                            <p>
+                                The current user will only be assigned if the user is logged in, so
+                                we use access look-up on at conn dor assigns (<code>@conn.assigns</code>) instead of
+                                using at current underscore user (<code>@current_user</code>).  If the current
+                                user assign is <code>nil</code>, then show a login button, otherwise show the user
+                                their name and a logout button.
+                            </p>
+                        </aside>
+                    </section>
+                    <section id="authentication-session-controller-delete">
+                        <h1>Session Controller <code>delete</code></h1>
+                        <pre><code class="elixir stretch" data-trim>
+def delete(conn, _) do
+  delete_session(conn, :current_user)
+  |> put_flash(:info, "You have been logged out")
+  |> redirect(to: session_path(conn, :new))
+end
+                        </code></pre>
+                        <aside class="notes">
+                            <p>
+                                If the user clicks the logout button, we delete the session and redirect back to login
+                                since all pages are protected.
                             </p>
                         </aside>
                     </section>
