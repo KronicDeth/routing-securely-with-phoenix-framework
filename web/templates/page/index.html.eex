@@ -34,3 +34,15 @@
     </ul>
   </div>
 </div>
+
+<div id="messages" class="container"></div>
+<div id="footer">
+  <div class="container">
+    <div class="row">
+      <div class="col-sm-12">
+        <label for="message-input">Your Message:</label>
+        <textarea id="message-input" class="form-control"></textarea>
+      </div>
+    </div>
+  </div>
+</div>

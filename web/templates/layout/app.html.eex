@@ -6,6 +6,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="">
     <meta name="author" content="">
+  <%= case @conn.assigns[:current_user] do %>
+  <%    nil -> %>
+  <%    current_user -> %>
+    <%= tag :meta,
+            content: Phoenix.Token.sign(@conn, "user", {current_user.id, current_user.socket_token}),
+            name: "socket_token" %>
+  <% end %>
 
     <title>Routing Securely With Phoenix Framework</title>
     <link rel="stylesheet" href="<%= static_path(@conn, "/css/app.css") %>">

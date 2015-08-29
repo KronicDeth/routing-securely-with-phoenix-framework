@@ -59,6 +59,7 @@ defmodule RoutingSecurelyWithPhoenixFramework.Web do
       use Phoenix.Channel
 
       alias RoutingSecurelyWithPhoenixFramework.Repo
+      alias RoutingSecurelyWithPhoenixFramework.User
       import Ecto.Model
       import Ecto.Query, only: [from: 2]
 

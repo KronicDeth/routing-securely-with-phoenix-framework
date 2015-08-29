@@ -1,37 +1,50 @@
 defmodule RoutingSecurelyWithPhoenixFramework.UserSocket do
   use Phoenix.Socket
 
+  alias RoutingSecurelyWithPhoenixFramework.Repo
+  alias RoutingSecurelyWithPhoenixFramework.User
+
   ## Channels
   channel "rooms:*", RoutingSecurelyWithPhoenixFramework.RoomChannel
 
   ## Transports
   transport :websocket, Phoenix.Transports.WebSocket
-  # transport :longpoll, Phoenix.Transports.LongPoll
+  transport :longpoll, Phoenix.Transports.LongPoll
 
-  # Socket params are passed from the client and can
-  # be used to verify and authenticate a user. After
-  # verification, you can put default assigns into
-  # the socket that will be set for all channels, ie
-  #
-  #     {:ok, assign(socket, :user_id, verified_user_id)}
-  #
-  # To deny connection, return `:error`.
-  #
-  # See `Phoenix.Token` documentation for examples in
-  # performing token verification on connect.
-  def connect(_params, socket) do
+  @seconds_per_minute 60
+  @minutes_per_hour 60
+  @hours_per_day 24
+  @days_per_week 7
+  @token_max_age 2 * @days_per_week * @hours_per_day * @minutes_per_hour *
+                 @seconds_per_minute
+
+  def connect(%{"token" => token}, socket) do
+    case Phoenix.Token.verify(socket, "user", token, max_age: @token_max_age) do
+      {:ok, {id, socket_token}} ->
+        connect_user_id_and_socket_token(socket, id, socket_token)
+      {:error, reason} ->
+        :error
+    end
+  end
+
+  @doc """
+  Group all sockets for a given user together so they can be disconnected.
+
+  # Disconnecting a compromised user
+
+      iex> RoutingSecurelyWithPhoenixFramework.Endpoint.broadcast("user_sockets:" <> user.id, "disconnect")
+  """
+  def id(socket), do: "user_sockets:#{socket.assigns.user_id}"
+
+  # Private Functions
+
+  defp connect_user(socket, user) do
+    socket = assign(socket, :user_id, user.id)
     {:ok, socket}
   end
 
-  # Socket id's are topics that allow you to identify all sockets for a given user:
-  #
-  #     def id(socket), do: "users_socket:#{socket.assigns.user_id}"
-  #
-  # Would allow you to broadcast a "disconnect" event and terminate
-  # all active sockets and channels for a given user:
-  #
-  #     RoutingSecurelyWithPhoenixFramework.Endpoint.broadcast("users_socket:" <> user.id, "disconnect", %{})
-  #
-  # Returning `nil` makes this socket anonymous.
-  def id(_socket), do: nil
+  defp connect_user_id_and_socket_token(socket, id, socket_token) do
+    user = Repo.get_by!(User, id: id, socket_token: socket_token)
+    connect_user socket, user
+  end
 end

@@ -9,7 +9,9 @@ defmodule RoutingSecurelyWithPhoenixFramework.RegistrationController do
     changeset = User.changeset(%User{}, user_params)
 
     if changeset.valid? do
-      case changeset |> User.generate_password |> Repo.insert do
+      full_changeset = User.full_changeset(changeset)
+
+      case Repo.insert(full_changeset) do
         {:ok, user} ->
           conn
           |> put_flash(:info, "Successfully registered and logged in")
