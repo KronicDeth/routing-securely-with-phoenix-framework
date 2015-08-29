@@ -2,7 +2,7 @@ defmodule RoutingSecurelyWithPhoenixFramework.UserSocket do
   use Phoenix.Socket
 
   ## Channels
-  # channel "rooms:*", RoutingSecurelyWithPhoenixFramework.RoomChannel
+  channel "rooms:*", RoutingSecurelyWithPhoenixFramework.RoomChannel
 
   ## Transports
   transport :websocket, Phoenix.Transports.WebSocket
