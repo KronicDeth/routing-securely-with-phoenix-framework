@@ -17,7 +17,7 @@ defmodule RoutingSecurelyWithPhoenixFramework.SessionController do
   end
 
   def delete(conn, _) do
-    delete_session(conn, :current_user)
+    delete_session(conn, :current_user_id)
     |> put_flash(:info, "You have been logged out")
     |> redirect(to: session_path(conn, :new))
   end
@@ -39,7 +39,7 @@ defmodule RoutingSecurelyWithPhoenixFramework.SessionController do
   defp sign_in(user, password, conn) when is_map(user) do
     if Comeonin.Bcrypt.checkpw(password, user.password_hash) do
       conn
-      |> put_session(:current_user, user)
+      |> put_session(:current_user_id, user.id)
       |> put_flash(:info, "You are now signed in.")
       |> redirect(to: page_path(conn, :index))
     else

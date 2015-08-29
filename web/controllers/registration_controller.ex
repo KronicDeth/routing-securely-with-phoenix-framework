@@ -13,7 +13,7 @@ defmodule RoutingSecurelyWithPhoenixFramework.RegistrationController do
         {:ok, user} ->
           conn
           |> put_flash(:info, "Successfully registered and logged in")
-          |> put_session(:current_user, user)
+          |> put_session(:current_user_id, user.id)
           |> redirect(to: page_path(conn, :index))
         {:error, changeset} ->
           render conn, "new.html", changeset: changeset
