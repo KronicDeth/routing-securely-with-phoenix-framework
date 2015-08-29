@@ -1975,7 +1975,7 @@ end
         {:ok, user} ->
           conn
           |> put_flash(:info, "Successfully registered and logged in")
-          |> put_session(:current_user, user)
+          |> put_session(:current_user_id, user_id)
           |> redirect(to: page_path(conn, :index))
         {:error, changeset} ->
           render conn, "new.html", changeset: changeset
@@ -2002,6 +2002,11 @@ end
                             <p>
                                 If there's a validation or a constraint error, then we render the new form with
                                 the errors.
+                            </p>
+                            <p>
+                                The current user ID is stored in the session instead of the current user, so that
+                                a stale user format can't be retrieved from the session.  It also keeps the session
+                                cookie size down since it's only storing an integer instead of a Struct.
                             </p>
                         </aside>
                     </section>
@@ -2041,18 +2046,36 @@ end
 defmodule RoutingSecurelyWithPhoenixFramework.Plug.Authenticate do
   import RoutingSecurelyWithPhoenixFramework.Router.Helpers
 
-  def init(opts), do: opts
+  alias RoutingSecurelyWithPhoenixFramework.Repo
+  alias RoutingSecurelyWithPhoenixFramework.User
+
+  def init(opts) do
+    opts
+  end
 
   def call(conn, _opts) do
-    case Plug.Conn.get_session(conn, :current_user) do
-      nil ->
-        conn
-        |> Phoenix.Controller.put_flash(:error, 'You need to be signed in to view this page')
-        |> Phoenix.Controller.redirect(to: session_path(conn, :new))
-        |> Plug.Conn.halt
-      current_user ->
-        Plug.Conn.assign(conn, :current_user, current_user)
-    end
+    assign_current_user(conn)
+  end
+
+  defp assign_current_user(conn = %Plug.Conn{}) do
+    assign_current_user(conn, Plug.Conn.get_session(conn, :current_user_id))
+  end
+  defp assign_current_user(conn, id) when is_integer(id) do
+    assign_current_user(conn, Repo.get(User, id))
+  end
+  defp assign_current_user(conn, user = %User{}) do
+    Plug.Conn.assign(conn, :current_user, user)
+  end
+  defp assign_current_user(conn, _), do: redirect_to_sign_in(conn)
+
+  defp redirect_to_sign_in(conn) do
+    conn
+    |> Phoenix.Controller.put_flash(
+         :error,
+         'You need to be signed in to view this page'
+       )
+    |> Phoenix.Controller.redirect(to: session_path(conn, :new))
+    |> Plug.Conn.halt
   end
 end
                         </code></pre>
@@ -2063,6 +2086,11 @@ end
                                 pass through unused in <code>init/2</code> to maintain the signature and are prefixed with
                                 underscore (<code>_opts</code>) to let the compiler know we expect to not use the variable
                                 in <code>call</code>.
+                            </p>
+                            <p>
+                                The bulk of the plug is the assign current user function, where is clause does a single
+                                transformation convert a connection to a user id to a user  The final clause handles
+                                both if the current user id is <code>nil</code> or if the user is <code>nil</code>.
                             </p>
                             <p>
                                 The Plug dot conn dot halt (<code>Plug.Conn.halt</code>) is important as it stops the
@@ -2199,7 +2227,7 @@ end
 
   @sign_in_error "Name or password are incorrect."
 
-  defp sign_in(user, password, conn) when is_nil(user) do
+  defp sign_in(user, _password, conn) when is_nil(user) do
     conn
     |> put_flash(:error, @sign_in_error)
     |> render "new.html", changeset: User.changeset(%User{})
@@ -2208,7 +2236,7 @@ end
   defp sign_in(user, password, conn) when is_map(user) do
     if Comeonin.Bcrypt.checkpw(password, user.password_hash) do
       conn
-      |> put_session(:current_user, user)
+      |> put_session(:current_user_id, user.id)
       |> put_flash(:info, "You are now signed in.")
       |> redirect(to: page_path(conn, :index))
     else
@@ -2292,7 +2320,7 @@ end
                         <h1>Session Controller <code>delete</code></h1>
                         <pre><code class="elixir stretch" data-trim>
 def delete(conn, _) do
-  delete_session(conn, :current_user)
+  delete_session(conn, :current_user_id)
   |> put_flash(:info, "You have been logged out")
   |> redirect(to: session_path(conn, :new))
 end
