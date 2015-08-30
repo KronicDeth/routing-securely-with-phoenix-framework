@@ -18,9 +18,9 @@ defmodule RoutingSecurelyWithPhoenixFramework.RoomChannel do
     broadcast! socket,
                "new_message",
                %{
-                  body: body,
+                  body: Plug.HTML.html_escape(body),
                   user: %{
-                    name: user.name
+                    name: Plug.HTML.html_escape(user.name)
                   }
                }
     {:noreply, socket}
