@@ -1,6 +1,7 @@
 defmodule RoutingSecurelyWithPhoenixFramework.SessionController do
   use RoutingSecurelyWithPhoenixFramework.Web, :controller
 
+  alias RoutingSecurelyWithPhoenixFramework.Plug.Authenticate
   alias RoutingSecurelyWithPhoenixFramework.User
 
   plug :scrub_params, "user" when action in [:create]
@@ -39,8 +40,8 @@ defmodule RoutingSecurelyWithPhoenixFramework.SessionController do
   defp sign_in(user, password, conn) when is_map(user) do
     if Comeonin.Bcrypt.checkpw(password, user.password_hash) do
       conn
-      |> put_session(:current_user_id, user.id)
       |> put_flash(:info, "You are now signed in.")
+      |> Authenticate.put_session(user)
       |> redirect(to: page_path(conn, :index))
     else
       conn
