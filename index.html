@@ -29,6 +29,24 @@
 			document.getElementsByTagName( 'head' )[0].appendChild( link );
 		</script>
 
+        <style>
+            ul.procon li {
+                list-style: none;
+                padding-left: 1em;
+                text-indent: -1em;
+            }
+
+            ul.procon li.con:before {
+                content: "-";
+                padding-right: 7px;
+            }
+
+            ul.procon li.pro:before {
+                content: "+";
+                padding-right: 7px;
+            }
+        </style>
+
 		<!--[if lt IE 9]>
 		<script src="lib/js/html5shiv.js"></script>
 		<![endif]-->
@@ -143,6 +161,9 @@
                         </li>
                         <li>
                             <a href="#/channels">Channels</a>
+                        </li>
+                        <li>
+                            <a href="#/xss">XSS</a>
                         </li>
                     </ol>
                 </section>
@@ -2341,7 +2362,7 @@ end
                         <h1>CSRF</h1>
                         <ul>
                             <li>
-                                <a href="#/csrf-definition">Overview</a>
+                                <a href="#/csrf-overview">Overview</a>
                             </li>
                             <li>
                                 <a href="#/csrf-false-protections">False CSRF Protections</a>
@@ -3011,7 +3032,7 @@ end
                     </section>
                     <section id="channels-demo">
                         <h1>Demo</h1>
-                        <video data-autoplay src="videos/xss-message.m4v"></video>
+                        <video class="stretch" data-autoplay src="videos/xss-message.m4v"></video>
                         <aside class="notes">
                             <p>
                                 I have 2 accounts logged in: Kronic Deth on the left and Chuck on the right.
@@ -3021,6 +3042,199 @@ end
                             </p>
                             <p>
                                 And Chuck just posted a message using Kronic Deth's token.
+                            </p>
+                        </aside>
+                    </section>
+                </section>
+                <section class="stack">
+                    <section id="xss">
+                        <h1>XSS</h1>
+                        <ul>
+                            <li>
+                                <a href="#/xss-overview">Overview</a>
+                            </li>
+                            <li>
+                                <a href="#/xss-poc">Proof-of-Concept</a>
+                            </li>
+                            <li>
+                                <a href="#/xss-prevention">Prevention</a>
+                            </li>
+                            <li>
+                                <a href="#/xss-escaping-location">Escaping Location</a>
+                            </li>
+                            <li>
+                                <a href="#/xss-escaping-channel-messages">Escaping Channel Messages</a>
+                            </li>
+                            <li>
+                                <a href="#/xss-protection-demo">Demo</a>
+                            </li>
+                        </ul>
+                        <aside class="notes">
+                            <p>
+                                So, our channel implementation is vulnerable to cross-site scripting and our user's
+                                socket token has been compromised, so we need a way to protect from further attacks
+                                and restore the user's account.
+                            </p>
+                        </aside>
+                    </section>
+                    <section id="xss-overview">
+                        <h1>XSS</h1>
+                        <h1>Cross-Site Scripting</h1>
+                        <ol>
+                            <li>Chuck posts a message containing &lt;script&gt; tag</li>
+                            <li>Kronic Deth views message and script executes in his browser</li>
+                            <li>Chuck can now act as Kronic Deth</li>
+                        </ol>
+                        <aside class="notes">
+                            <p>
+                                There are two general categories of cross-site scripting attacks persistent and
+                                non-persistent.  The attack launched in the demo is non-persistent only because
+                                the server doesn't currently record the chat messages.
+                            </p>
+                            <p>
+                                In the demo Chuck was able to post as Kronic Deth using Kronic Deth's
+                                <code>socket_token</code> from the meta tag, but Chuck's script could have just
+                                as easily entered data directly into the message input or read Kronic Deth's cookie
+                                and sent it to Chuck, which would allow Chuck to login directly as Kronic Deth.
+                            </p>
+                        </aside>
+                    </section>
+                    <section id="xss-poc">
+                        <h1>Proof-of-Concept</h1>
+                        <pre><code class="stretch" data-trim>
+&lt;script&gt;
+  $ = require("jquery");
+  userName = $("nav span.label-info").text().trim();
+  
+  if (userName !== "Chuck") {
+    socketToken = $('meta[name="socket_token"]').attr("content");
+    
+    phoenix = require("deps/phoenix/web/static/js/phoenix");
+    socket = new phoenix.Socket("/socket");
+    socket.connect({ token: socketToken});
+    channel = socket.channel("rooms:lobby", {});
+    channel.join().receive("ok", function (response) {
+      channel.push("new_message", { body: "Message sent by Chuck's XSS" });
+    });
+  }
+&lt;/script&gt;                            
+                        </code></pre>
+                        <aside class="notes">
+                            <p>
+                                The proof-of-concept code the Chuck posted demonstrates that one can access the ES6
+                                libraries with the same name as in ES6, but using <code>require</code> instead of
+                                <code>import</code>.
+                            </p>
+                            <p>
+                                It prevent the attack launching back against Chuck by checking the userName from the
+                                navbar.
+                            </p>
+                        </aside>
+                    </section>
+                    <section id="xss-prevention">
+                        <h1>XSS Prevention</h1>
+                        <ul>
+                            <li>Never Insert Untrusted Data</li>
+                            <li>Escaping untrusted data must be tuned to the insertion environment</li>
+                            <li>Don't write your own escaping library</li>
+                        </ul>
+                        <aside class="notes">
+                            <p>
+                                Any user input should be treated as untrusted.
+                            </p>
+                            <p>
+                                To safely handle untrusted data, you must escape it, but the rules for escaping data
+                                are dependent on where the data will be insert: is into inside an HTML tag or attribute,
+                                a script tag, CSS or URL?
+                            </p>
+                            <p>
+                                Just like cryptography, you shouldn't write your own escaping library.  Use a trust
+                                library that follows OWASP recommendations.
+                            </p>
+                        </aside>
+                    </section>
+                    <section id="xss-escaping-location">
+                        <h1>Escaping Location</h1>
+                        <ol>
+                            <li>
+                                <p>Client-side</p>
+                                <ul class="procon">
+                                    <li class="pro">Clients can tune escaping to insertion point</li>
+                                    <li class="con">Each client has to do the escaping</li>
+                                </ul>
+                            </li>
+                            <li>
+                                <p>Server-side</p>
+                                <ul class="procon">
+                                    <li class="pro">Server escapes once and all clients can use data directly</li>
+                                    <li class="pro">Don't have to worry about clients forgetting to escape</li>
+                                    <li class="con">Server has to assume insert point type on all clients</li>
+                                </ul>
+                            </li>
+                        </ol>
+                        <aside class="notes">
+                            <p>
+                                We could escape the messages either client-side using javascript before appending or
+                                we could escape on the server before broadcasting the message.
+                            </p>
+                            <p>
+                                I prefer escaping on the server because it's less to do on the clients and it prevents
+                                the chance of forgetting to escape the message before it's shown to new clients, such
+                                as if messages start to be persisted and shown back to users.
+                            </p>
+                            <p>
+                                Decisions on when to escape must be re-evaluated when untrusted data is used in a new
+                                location.
+                            </p>
+                        </aside>
+                    </section>
+                    <section id="xss-escaping-channel-messages">
+                        <h1>Escaping Channel Messages</h1>
+                        <pre><code class="elixir scretch" data-trim>
+defmodule RoutingSecurelyWithPhoenixFramework.RoomChannel do
+  @doc """
+  Broadcast a message from one user to all users (including the originating user)
+  """
+  def handle_in("new_message", %{"body" => body}, user, socket) do
+    broadcast! socket,
+               "new_message",
+               %{
+                  body: Plug.HTML.html_escape(body),
+                  user: %{
+                    name: Plug.HTML.html_escape(user.name)
+                  }
+               }
+    {:noreply, socket}
+  end
+end
+                        </code></pre>
+                        <aside class="notes">
+                            <p>
+                                So, all we had to do was use Phoenix dot HTML dot escape
+                                (<code>Phoenix.HTML.escape</code>) on the message body before broadcasting it to
+                                prevent the proof-of-concept's attack.
+                            </p>
+                            <p>
+                                But, a similar problem could occur with the user name, so we'll also escape that.
+                            </p>
+                            <p>
+                                We use Plug dot HTML dot html underscore escape (<code>Plug.HTML.html_escape</code>)
+                                instead of Phoenix dot HTML dot html underscore escape
+                                (<code>Phoenix.HTML.html_escape</code>) because the one from Phoenix return a tuple
+                                of the atom safe (<code>:safe</code> and the escaped string to work with the safe vs raw
+                                strings systems used in E-E-X html templates.
+                            </p>
+                        </aside>
+                    </section>
+                    <section id="xss-protection-demo">
+                        <h1>Demo</h1>
+                        <video class="stretch" data-autoplay src="videos/xss-protection.m4v"></video>
+                        <aside class="notes">
+                            <p>
+                                Once again, we're in the chat.  Chuck tries his cross-site scripting again...
+                            </p>
+                            <p>
+                                ... and it not longer works.
                             </p>
                         </aside>
                     </section>
@@ -3064,6 +3278,11 @@ end
                         <li>
                             <a href="http://hexdocs.pm/phoenix/Phoenix.Token.html">
                                 <code>Phoenix.Token</code>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://www.owasp.org/index.php/Cross-site_Scripting_(XSS)">
+                                Cross-site Scripting (XSS)
                             </a>
                         </li>
                     </ul>
