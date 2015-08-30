@@ -141,6 +141,9 @@
                         <li>
                             <a href="#/csrf">CSRF</a>
                         </li>
+                        <li>
+                            <a href="#/channels">Channels</a>
+                        </li>
                     </ol>
                 </section>
                 <section class="stack">
@@ -2497,6 +2500,531 @@ end
                         </aside>
                     </section>
                 </section>
+                <section class="stack">
+                    <section id="channels">
+                        <h1>Channels</h1>
+                        <ul>
+                            <li>
+                                <a href="#/channel-overview">Overview</a>
+                            </li>
+                            <li>
+                                <a href="#/channels-template-pages">Pages Template</a>
+                            </li>
+                            <li>
+                                <a href="#/channels-jquery">jQuery</a>
+                            </li>
+                            <li>
+                                <a href="#/channels-socket-js">
+                                    <code>socket.js</code>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#/channels-socket-token-meta-tag">
+                                    <code>socket_token</code> <code>meta</code> tag
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#/channels-adding-socket-token-to-users">
+                                   Adding <code>socket_token</code> to <code>users</code>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#/channels-adding-socket-token-to-user-schema">
+                                   Adding <code>socket_token</code> to <code>User</code> schema
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#/channels-generating-secrets-on-registration">
+                                    Generating secrets on registration
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#/channels-user-full-changeset">
+                                    <code>User.full_changeset/1</code>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#/channels-user-socket-connect">
+                                    <code>UserSocket.connect/2</code>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#/channels-user-socket-id">
+                                    <code>UserSocket.id/1</code>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#/channels-room-channel">
+                                    <code>RoomChannel</code>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#/channels-demo">
+                                    Demo
+                                </a>
+                            </li>
+                        </ul>
+                    </section>
+                    <section id="channel-overview">
+                        <h1>Overview</h1>
+                        <ul>
+                            <li>Bidirectional communications from clients</li>
+                            <li>Transported over Websockets or Long Polling</li>
+                            <li>Browser, Android, and iOS clients</li>
+                            <li>Distributed over PubSub layer between Phoenix nodes</li>
+                        </ul>
+                        <aside class="notes">
+                            <p>
+                                Channels are one of the cooler features of Phoenix where the concurrency support of
+                                the BEAM really signs.  Instead of a standard request response cycle, channels allow
+                                bidirectional communication over websockets that remain open.  Allowing messages to be
+                                pushed from the server to the client and between clients through the server.
+                            </p>
+                            <p>
+                                An obvious use for this is soft-realtime chat between users.
+                            </p>
+                        </aside>
+                    </section>
+                    <section id="channels-template-pages">
+                        <h1>Pages Template</h1>
+                        <pre><code data-trim>
+&lt;div id="messages" class="container"&gt;&lt;/div&gt;
+&lt;div id="footer"&gt;
+  &lt;div class="container"&gt;
+    &lt;div class="row"&gt;
+      &lt;div class="col-sm-12"&gt;
+        &lt;label for="message-input"&gt;Your Message:&lt;/label&gt;
+        &lt;textarea id="message-input" class="form-control"&gt;
+        &lt;/textarea&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+                        </code></pre>
+                        <aside class="notes">
+                            <p>
+                                To the bottom of web slash templates slash page slash index dot html dot E-E-X
+                                (<code>web/templates/page/index.html</code>) we'll add a div for the chat messages
+                                and an input box where the user can type messages.
+                            </p>
+                        </aside>
+                    </section>
+                    <section id="channels-jquery">
+                        <h1>jQuery</h1>
+                        <figure>
+                            <figcaption>
+                                <code>package.json</code>
+                            </figcaption>
+                            <pre><code class="javascript" data-trim style="width: 100%">
+{
+  "dependencies": {
+    "jquery": "~2.1"
+  }
+}
+
+                            </code></pre>
+                        </figure>
+                        <figure>
+                            <figcaption>
+                                <code>brunch-config.js</code>
+                                <pre><code class="javascript" data-trim style="width: 100%">
+exports.config = {
+  plugins: {
+    babel: {
+      // Do not use ES6 compiler in vendor code
+      ignore: [/web\/static\/vendor/, /node_modules\/jquery/]
+    }
+  },
+};
+                                </code></pre>
+                            </figcaption>
+                        </figure>
+                        <aside class="notes">
+                            <p>
+                                To make registering for events and updating the dom, I'm going to use jQuery.
+                            </p>
+                            <p>
+                                I need to jQuery to my package.json for node to install it and I need to tell, Babel,
+                                the ES6 to ES5 transpiler to ignore jQuery since jQuery is already ES5.
+                            </p>
+                        </aside>
+                    </section>
+                    <section id="channels-socket-js">
+                        <h1><code>socket.js</code></h1>
+                        <pre><code class="javascript stretch" data-trim>
+import {Socket} from "deps/phoenix/web/static/js/phoenix"
+import $ from "jquery"
+
+let socket = new Socket("/socket")
+let socketToken = $("meta[name='socket_token']").attr("content")
+
+if (socketToken !== undefined) {
+  socket.connect({token: socketToken})
+
+  // Now that you are connected, you can join the lobby
+  let channel = socket.channel("rooms:lobby", {})
+
+  let messageInput = $("#message-input")
+
+  messageInput.on("keypress", event => {
+    if (event.keyCode === 13) {
+      channel.push("new_message", {body: messageInput.val()})
+      messageInput.val("")
+    }
+  })
+
+  let messagesContainer = $("#messages")
+
+  channel.on("new_message", payload => {
+    messagesContainer.append(
+      `<p>
+        <span class="date-time">${Date()}</span>
+        <span class="user-name">${payload.user.name}</span>
+        ${payload.body}
+       </p>`
+    )
+  })
+
+  channel.join()
+}
+
+export default socket
+                        </code></pre>
+                        <aside class="notes">
+                            <p>
+                                mix phoenix dot new (<code>mix phoenix.new</code>) generates a socket dot J-S
+                                (<code>socket.js</code>) that is disabled by default.  We'll not fill it in for our
+                                chat.
+                            </p>
+                            <p>
+                                We'll get a socket_token from a meta tag because channels aren't tied to HTTP-based
+                                transports, so we can't depend on headers being sent and cookies are headers.
+                            </p>
+                            <p>
+                                rooms colon lobby (<code>rooms:lobby</code>) is an example channel from mix phoenix
+                                dot new (<code>mix phoenix.new</code>).
+                            </p>
+                            <p>
+                                The chat interface waits for the user to press enter, which sends the message to the
+                                server.  The server then broadcasts that message to all the users in rooms colon lobby
+                                and they add the message to the chat log.
+                            </p>
+                        </aside>
+                    </section>
+                    <section id="channels-socket-token-meta-tag">
+                        <h1><code>socket_token</code> <code>meta</code> tag</h1>
+                        <pre><code data-trim>
+&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+  &lt;head&gt;
+  &lt;%= case @conn.assigns[:current_user] do %&gt;
+  &lt;%    nil -&gt; %&gt;
+  &lt;%    current_user -&gt; %&gt;
+    &lt;%= tag :meta,
+            content: Phoenix.Token.sign(@conn, "user", {current_user.id, current_user.socket_token}),
+            name: "socket_token" %&gt;
+  &lt;% end %&gt;
+  &lt;/head&gt;
+&lt;/html&gt;
+                        </code></pre>
+                        <aside class="notes">
+                            <p>
+                                So, to make socket.js work we need to make socket underscore token available in a
+                                metatag, which we do by adding it to the layout.
+                            </p>
+                            <p>
+                                This has to be protected if a user isn't logged in since the layout is used on
+                                login and registration pages.
+                            </p>
+                            <p>
+                                To generate the actual token, we use Phoenix dot Token dot sign
+                                (<code>Phoenix.Token.sign</code>), passing user (<code>"user"</code>) as the salt,
+                                which must be know on the sending and receiving side and both the user ID and the
+                                user's socket token, which hasn't been defined yet in the User model.
+                            </p>
+                            <p>
+                                The socket token is used along with the id, so that the socket token can be changed
+                                if the user account is compromised and it will invalidate the signed tokens embedded
+                                in any open pages.
+                            </p>
+                            <p>
+                                If just the user id is used, then there's no way to invalidate the signed token
+                                besides having the token expired as the sign function embeds the signing time, but
+                                if you can't easily make the expiration time for one user's token be earlier.
+                            </p>
+                        </aside>
+                    </section>
+                    <section id="channels-adding-socket-token-to-users">
+                        <h1>Adding <code>socket_token</code> to <code>users</code></h1>
+                        <pre><code class="elixir stretch" data-trim>
+defmodule RoutingSecurelyWithPhoenixFramework.Repo.Migrations.AddChannelTokenToUser do
+  use Ecto.Migration
+
+  def down do
+    alter table(:users) do
+      remove :socket_token
+    end
+  end
+
+  def up do
+    alter table(:users) do
+      # add socket_token as null because it needs to be populated first
+      add :socket_token, :string, null: true
+    end
+
+    # populate with secure random value using same algorithm as `mix phoenix.gen.secret`
+    execute "CREATE EXTENSION IF NOT EXISTS pgcrypto"
+    execute "UPDATE users SET socket_token = encode(gen_random_bytes(64), 'base64') WHERE socket_token IS NULL"
+
+    alter table(:users) do
+      modify :socket_token, :string, null: false
+    end
+  end
+end
+                        </code></pre>
+                        <aside class="notes">
+                            <p>
+                                The migration has to do the dance of making a null column, populating it, then making
+                                it not null to handle any pre-existing user accounts.
+                            </p>
+                            <p>
+                                To populate the field, we want strong random bytes, so we'll use the gen_random_bytes
+                                function from the P-G crypto (<code>pgcrypto</code>) extension for PostgreSQL.
+                            </p>
+                            <p>
+                                To be able to use <code>CREATE EXTENSION</code>, the database user will need to have
+                                superuser permissions.
+                            </p>
+                        </aside>
+                    </section>
+                    <section id="channels-adding-socket-token-to-user-schema">
+                        <h1>Adding <code>socket_token</code> to <code>User</code> schema</h1>
+                        <pre><code class="elixir stretch" data-trim>
+defmodule RoutingSecurelyWithPhoenixFramework.User do
+  schema "users" do
+    field :socket_token, :string
+  end
+end
+                        </code></pre>
+                        <aside class="notes">
+                            <p>
+                                To be able to access the field from Ecto, we need to add socket token as a field to the
+                                <code>User</code> schema.
+                            </p>
+                        </aside>
+                    </section>
+                    <section id="channels-generating-secrets-on-registration">
+                        <h1>Generating secrets on registration</h1>
+                        <pre><code class="elixir stretch" data-trim>
+defmodule RoutingSecurelyWithPhoenixFramework.RegistrationController do
+  def create(conn, %{"user" => user_params}) do
+    changeset = User.changeset(%User{}, user_params)
+
+    if changeset.valid? do
+      full_changeset = User.full_changeset(changeset)
+
+      case Repo.insert(full_changeset) do
+        {:ok, user} ->
+          conn
+          |> put_flash(:info, "Successfully registered and logged in")
+          |> put_session(:current_user_id, user.id)
+          |> redirect(to: page_path(conn, :index))
+        {:error, changeset} ->
+          render conn, "new.html", changeset: changeset
+      end
+    else
+      render conn, "new.html", changeset: changeset
+    end
+  end
+end
+                        </code></pre>
+                        <aside class="notes">
+                            <p>
+                                We already had to generate the password hash when create users, now we'll also generate
+                                the socket token.
+                            </p>
+                        </aside>
+                    </section>
+                    <section id="channels-user-full-changeset">
+                        <h1><code>User.full_changeset/1</code></h1>
+                        <pre><code class="elixir stretch" data-trim>
+defmodule RoutingSecurelyWithPhoenixFramework.User do
+  @socket_token_length 64
+
+  @doc """
+  Fills `changeset` with generated columns.
+  """
+  def full_changeset(changeset) do
+    changeset
+    |> generate_password
+    |> generate_socket_token
+  end
+
+  @doc """
+  Generates a channel token for the user changeset.
+  """
+  def generate_socket_token(changeset) do
+    put_change(changeset, :socket_token, generate_secret(@socket_token_length))
+  end
+
+  # Private Functions
+
+  @doc """
+  Generates a random secret string of the given `length`
+  """
+  defp generate_secret(length) do
+    :crypto.strong_rand_bytes(length) |> Base.encode64 |> binary_part(0, length)
+  end
+end
+                        </code></pre>
+                        <aside class="notes">
+                            <p>
+                                generate secret (<code>generate_secret</code>) is the same code we used in the beginning
+                                to generate new secret key bases for configs.  The code is extracted from
+                                mix phoenix dot gen dot secret (<code>mix phoenix.gen.secret</code>).
+                            </p>
+                            <p>
+                                We can now send the signed socket token back to the server, but the server needs to
+                                verify the token on connect.
+                            </p>
+                        </aside>
+                    </section>
+                    <section id="channels-user-socket-connect">
+                        <h1><code>UserSocket.connect/2</code></h1>
+                        <pre><code class="elixir stretch" data-trim>
+defmodule RoutingSecurelyWithPhoenixFramework.UserSocket do
+  @seconds_per_minute 60
+  @minutes_per_hour 60
+  @hours_per_day 24
+  @days_per_week 7
+  @token_max_age 2 * @days_per_week * @hours_per_day * @minutes_per_hour *
+                 @seconds_per_minute
+
+  def connect(%{"token" => token}, socket) do
+    case Phoenix.Token.verify(socket, "user", token, max_age: @token_max_age) do
+      {:ok, {id, socket_token}} ->
+        connect_user_id_and_socket_token(socket, id, socket_token)
+      {:error, reason} ->
+        :error
+    end
+  end
+
+  defp connect_user(socket, user) do
+    socket = assign(socket, :user_id, user.id)
+    {:ok, socket}
+  end
+
+  defp connect_user_id_and_socket_token(socket, id, socket_token) do
+    user = Repo.get_by!(User, id: id, socket_token: socket_token)
+    connect_user socket, user
+  end
+end
+
+                        </code></pre>
+                        <aside class="notes">
+                            <p>
+                                I'm having the token expire every 2 just to demonstrate how to do that and because
+                                the Phoenix guides use it as an example.
+                            </p>
+                            <p>
+                                Phoenix dot Token dot verify (<code>Phoenix.Token.verify</code>) only verifies the
+                                token is signed correctly and not expired, but that's not enough if a user's account
+                                has been compromised and needed a credentials recent in the interim since the token
+                                was signed.
+                            </p>
+                            <p>
+                                To verify the token represents the user's current credentials, we use Repo dot get by
+                                bang (<code>Repo.get_by!</code>), which will raise an exception and kill the socket
+                                attempt if the id and socket_token don't BOTH match.  This will exclude deleted
+                                users too.
+                            </p>
+                            <p>
+                                We store th user ID instead of the <code>User</code> Struct directly so we don't have to
+                                worry about it becoming stale.
+                            </p>
+                        </aside>
+                    </section>
+                    <section id="channels-user-socket-id">
+                        <h1><code>UserSocket.id/1</code></h1>
+                        <pre><code class="elixir stretch" data-trim>
+defmodule RoutingSecurelyWithPhoenixFramework.UserSocket do
+  # Disconnecting a compromised user
+
+      iex> RoutingSecurelyWithPhoenixFramework.Endpoint.broadcast("user_sockets:" <> user_id, "disconnect")
+  """
+  def id(socket) do
+    "user_sockets:#{socket.assigns.user_id}"
+  end
+end
+                        </code></pre>
+                        <aside class="notes">
+                            <p>
+                                To allow us to kick all sockets from a given users, such as if the user becomes
+                                compromised or just needs the banhammer brought down on them, we can assign an id,
+                                which functions as a channel that all sockets for a given user belong to.
+                            </p>
+                        </aside>
+                    </section>
+                    <section id="channels-room-channel">
+                        <h1><code>RoomChannel</code></h1>
+                        <pre><code class="elixir stretch" data-trim>
+defmodule RoutingSecurelyWithPhoenixFramework.RoomChannel do
+  use RoutingSecurelyWithPhoenixFramework.Web, :channel
+
+  def join("rooms:lobby", _payload, socket) do
+    {:ok, socket}
+  end
+
+  @doc """
+  Get user from `socket` before handling event.
+  """
+  def handle_in(event, params, socket) do
+    user = Repo.get! User, socket.assigns.user_id
+    handle_in(event, params, user, socket)
+  end
+
+  @doc """
+  Broadcast a message from one user to all users (including the originating user)
+  """
+  def handle_in("new_message", %{"body" => body}, user, socket) do
+    broadcast! socket,
+               "new_message",
+               %{
+                  body: body,
+                  user: %{
+                    name: user.name
+                  }
+               }
+    {:noreply, socket}
+  end
+end
+                        </code></pre>
+                        <aside class="notes">
+                            <p>
+                                I let anyone that's got a socket, join the lobby.
+                            </p>
+                            <p>
+                                handle in slash 3 (<code>handle_in/3</code>) looks up the user from the user id and then
+                                calls handle in slash 4 (<cdoe>handle_in/4</cdoe>).
+                            </p>
+                        </aside>
+                    </section>
+                    <section id="channels-demo">
+                        <h1>Demo</h1>
+                        <video data-autoplay src="videos/xss-message.m4v"></video>
+                        <aside class="notes">
+                            <p>
+                                I have 2 accounts logged in: Kronic Deth on the left and Chuck on the right.
+                            </p>
+                            <p>
+                                Chuck decides to test the security of the chat by posting a script tag...
+                            </p>
+                            <p>
+                                And Chuck just posted a message using Kronic Deth's token.
+                            </p>
+                        </aside>
+                    </section>
+                </section>
                 <section>
                     <h1>Sources</h1>
                     <ul>
@@ -2532,6 +3060,11 @@ end
                         </li>
                         <li>
                             <a href="https://tools.ietf.org/html/rfc6454#section-4">RFC 6454</a>
+                        </li>
+                        <li>
+                            <a href="http://hexdocs.pm/phoenix/Phoenix.Token.html">
+                                <code>Phoenix.Token</code>
+                            </a>
                         </li>
                     </ul>
                 </section>
