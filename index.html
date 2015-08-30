@@ -3282,7 +3282,455 @@ end
                         </aside>
                     </section>
                 </section>
+                <section class="stack">
+                    <section id="compromise-recovery">
+                        <h1>Compromise Recovery</h1>
+                        <ul>
+                            <li>
+                                <a href="#/compromise-recovery-remote-shell">
+                                    Remote Shell
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#/compromise-recovery-evict-from-remote-shell">
+                                    Evict Attacker
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#/compromise-recovery-secure-kronic-deth">
+                                    Secure Victim
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#/compromise-recovery-invalidating-sessions">
+                                    Invalidating Sessions
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#/compromise-recovery-authenticate-review">
+                                    <code>Authenticate</code> (Review)
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#/compromise-recovery-token-control">
+                                    Authentication Tokens
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#/compromise-recovery-add-session-token-to-users">
+                                    Add <code>session_token</code> to <code>users</code>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#/compromise-recovery-adding-session-token-to-user-schema">
+                                    Adding <code>session_token</code> to <code>User</code> schema
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#/compromise-recovery-authenticate-with-revocation">
+                                    <code>Authenticate</code> with revocation
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#/compromise-recovery-registration-controller-create">
+                                    <code>RegistrationController.create</code>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#/compromise-recovery-session-controller-sign-in">
+                                    <code>SessionController.sign_in</code>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#/compromise-recovery-summary">
+                                    Summary
+                                </a>
+                            </li>
+                        </ul>
+                        <aside class="notes">
+                            <p>
+                                We've closed the cross-site scripting vulnerability, but we still need to recovery from the
+                                compromise by resetting Kronic Deth's account to a state that Chuck doesn't know and banning
+                                Chuck's account.
+                            </p>
+                        </aside>
+                    </section>
+                    <section id="compromise-recovery-remote-shell">
+                        <h1>Remote Shell</h1>
+                        <ol class="stretch">
+                            <li>
+                                <p>Run server on a named node with a known cookie</p>
+                                <pre><code class="bash" data-trim>iex --cookie $COOKIE --name server@$HOST -S mix phoenix.server</code></pre>
+                            </li>
+                            <li>
+                                <p>Connect with remote shell</p>
+                                <pre><code class="bash" data-trim>iex --cookie $COOKIE --hidden --name console@$HOST --remsh server@$HOST</code></pre>
+                            </li>
+                        </ol>
+                        <aside class="notes">
+                            <p>
+                                I'm going to assume we were running the server on a named node, so we can connect with
+                                Erlang's dash dash R-E-M-S-H (<code>--remsh</code>) or remote shell, to run the commands
+                                to delete Chuck and disconnect his sockets without needing to restart the server.
+                            </p>
+                        </aside>
+                    </section>
+                    <section id="compromise-recovery-evict-from-remote-shell">
+                        <h1>Evict Attacker using Remote Shell</h1>
+                        <ol class="stretch">
+                            <li>
+                                <p>Setup some aliases</p>
+                                <pre><code class="elixir" data-trim>
+alias RoutingSecurelyWithPhoenixFramework.Endpoint
+alias RoutingSecurelyWithPhoenixFramework.Repo
+alias RoutingSecurelyWithPhoenixFramework.User
+                                </code></pre>
+                            </li>
+                            <li>
+                                <p>Delete attacker's account</p>
+                                <pre><code class="elixir" data-trim>
+user = Repo.get_by!(User, name: "Chuck")
+Repo.delete!(user)
+                                </code></pre>
+                            </li>
+                            <li>
+                                <p>Disconnect attacker's sockets</p>
+                                <pre><code class="elixir" data-trim>
+Endpoint.broadcast("user_sockets:#{user.id}", "disconnect", %{})
+                                </code></pre>
+                                <img src="images/chuck-websocket-500.png"
+                                     style="height: auto; width: 100%"/>
+                            </li>
+                        </ol>
+                        <aside class="notes">
+                            <p>
+                                So, Chuck can't connect to the live chat and if he tries to logout and back in, that
+                                won't work to fix the socket since his account is gone.
+                            </p>
+                        </aside>
+                    </section>
+                    <section id="compromise-recovery-secure-kronic-deth">
+                        <h1>Secure Victim using Remote Shell</h1>
+                        <ol class="stretch">
+                            <li>
+                                <p>Reset Password</p>
+                                <pre><code class="elixir" data-trim>
+user = Repo.get_by!(User, name: "Kronic Deth")
+changeset = User.changeset(user, %{"password" => new_password, "password_confirmation" => new_password})
+                                </code></pre>
+                            </li>
+                            <li>
+                                <p>Reset Socket Token</p>
+                                <pre><code class="elixir" data-trim>
+full_changeset = User.full_changeset(changeset)
+Repo.update!(full_changeset)
+                                </code></pre>
+                            </li>
+                            <li>
+                                <p>Disconnect Kronic Deth's active sockets</p>
+                                <pre><code class="elixir" data-trim>
+Endpoint.broadcast("user_sockets:#{user.id}", "disconnect", %{})
+                                </code></pre>
+                                <img src="images/kronic-deth-websocket-500.png"
+                                     style="height: auto; width: 100%"/>
+                            </li>
+                        </ol>
+                        <aside class="notes">
+                            <p>
+                                But, remember, Chuck's Proof-of-Concept exploit grabbed Kronic Deth's socket token, so
+                                Kronic Deth needs a new.  Additionally, the XSS could have grabbed Kronic Deth's cookie
+                                and we just didn't know about it, so we want to reset Kronic Deth's password too.
+                            </p>
+                            <p>
+                                So, Kronic Deth's account would be safe now, right?
+                            </p>
+                            <p>
+                                No, because we just reset his password, not his sessions, so either if either
+                                Kronic Deth or Chuck has Kronic Deth's cookie, they can just refresh the page
+                                and get the new socket token now!
+                            </p>
+                        </aside>
+                    </section>
+                    <section id="compromise-recovery-invalidating-sessions">
+                        <h1>Invalidating Sessions</h1>
+                        <ol>
+                            <li>Reset Kronic Deth's session</li>
+                            <li>Reset <code>secret_key_base</code></li>
+                        </ol>
+                        <aside class="notes">
+                            <p>
+                                We need to either invalidate a single user's sessions or invalidate all sessions
+                                by changing secret key base.   In the event of a real breach using code like
+                                Chuck posted, which would hit all users in a given channel, it would be best to
+                                invalidate everyone's session because you might not be able to track down whose
+                                credentials were and were not compromised
+                            </p>
+                            <p>
+                                But, let's say you can prove only a small group of users were affected.  How woudl
+                                we do that with the current Authenticate plug?
+                            </p>
+                        </aside>
+                    </section>
+                    <section id="compromise-recovery-authenticate-review">
+                        <h1>Authenticate (Review)</h1>
+                        <pre><code class="elixir stretch" data-trim>
+defmodule RoutingSecurelyWithPhoenixFramework.Plug.Authenticate
+  defp assign_current_user(conn = %Plug.Conn{}) do
+    assign_current_user(conn, Plug.Conn.get_session(conn, :current_user_id))
+  end
+  defp assign_current_user(conn, id) when is_integer(id) do
+    assign_current_user(conn, Repo.get(User, id))
+  end
+  defp assign_current_user(conn, user = %User{}) do
+    Plug.Conn.assign(conn, :current_user, user)
+  end
+  defp assign_current_user(conn, _), do: redirect_to_sign_in(conn)
 
+  defp redirect_to_sign_in(conn) do
+    conn
+    |> Phoenix.Controller.put_flash(
+         :error,
+         'You need to be signed in to view this page'
+       )
+    |> Phoenix.Controller.redirect(to: session_path(conn, :new))
+    |> Plug.Conn.halt
+  end
+end
+                        </code></pre>
+                        <aside class="notes">
+                            <p>
+                                A session is valid if it's not expired, the secret key bases match, and the current user
+                                id (<code>current_user_id</code>) can be looked up.
+                            </p>
+                            <p>
+                                We can't change the expiration time or the secret key base for a single user, so we're
+                                left that we can change is the ID, but that doesn't make sense because the user id
+                                is likely to be foreign key in other parts of the application.
+                            </p>
+                        </aside>
+                    </section>
+                    <section id="compromise-recovery-token-control">
+                        <h1>Authentication Tokens</h1>
+                        <ul>
+                            <li>Tamper evident</li>
+                            <li>Expire</li>
+                            <li class="fragment">Revocable by server</li>
+                        </ul>
+                        <aside class="notes">
+                            <p>
+                                To summarize we want authentication tokens to be tamper evident, which they already are due
+                                to signing; expire which they do because they include the time...
+                            </p>
+                            <p>
+                                [Hit enter for fragment] ... but, they must also contain an field that is updatable by the
+                                server that can be checked for correctness allowing for revocation.
+                            </p>
+                            <p>
+                                The user socket token (<code>socket_token</code>) being embedded in the signed socket token
+                                metatag allows for it to be revoked, but there is no equivalent field in the session.
+                            </p>
+                        </aside>
+                    </section>
+                    <section id="compromise-recovery-add-session-token-to-users">
+                        <h1>Add <code>session_token</code> to <code>users</code></h1>
+                        <pre><code class="elixir stretch" data-trim>
+defmodule RoutingSecurelyWithPhoenixFramework.Repo.Migrations.AddSessionTokenToUser do
+  use Ecto.Migration
+
+  def down do
+    alter table(:users) do
+      remove :session_token
+    end
+  end
+
+  def up do
+    alter table(:users) do
+      # add session_token as null because it needs to be populated first
+      add :session_token, :string, null: true
+    end
+
+    # populate with secure random value using same algorithm as `mix phoenix.gen.secret`
+    execute "CREATE EXTENSION IF NOT EXISTS pgcrypto"
+    execute "UPDATE users SET session_token = encode(gen_random_bytes(64), 'base64') WHERE session_token IS NULL"
+
+    alter table(:users) do
+      modify :session_token, :string, null: false
+    end
+  end
+end
+                        </code></pre>
+                        <aside class="notes">
+                            <p>
+                                We use the same migration as with socket token, but change the column name to
+                                session token.
+                            </p>
+                        </aside>
+                    </section>
+                    <section id="compromise-recovery-adding-session-token-to-user-schema">
+                        <h1>Adding <code>session_token</code> to <code>User</code> schema</h1>
+                        <pre><code class="elixir stretch" data-trim>
+defmodule RoutingSecurelyWithPhoenixFramework.User do
+  schema "users" do
+    field :session_token, :string
+  end
+end
+                        </code></pre>
+                        <aside class="notes">
+                            <p>
+                                We then add the field to the User schema.
+                            </p>
+                        </aside>
+                    </section>
+                    <section>
+                        <h1><code>User.full_changeset/1</code></h1>
+                        <pre><code class="elixir stretch" data-trim>
+defmodule RoutingSecurelyWithPhoenixFramework.User do
+  @token_length 64
+
+  @doc """
+  Fills `changeset` with generated columns.
+  """
+  def full_changeset(changeset) do
+    changeset
+    |> generate_password
+    |> generate_token(:session)
+    |> generate_token(:socket)
+  end
+
+  @doc """
+  Generates a token to allow `type` credentials to be revoked.
+  """
+  def generate_token(changeset, type) do
+    put_change(changeset, :"#{type}_token", generate_secret(@token_length))
+  end
+end
+                        </code></pre>
+                        <aside class="notes">
+                            <p>
+                                We need to add generate session token (<code>generate_session_token</code>) to
+                                User full changeset (<code>User.full_changeset</code>).
+                            </p>
+                            <p>
+                                Since both tokens are generated the same way, we'll refactor to one function for
+                                generating tokens.  We keep the tokens separate to allow auditing where the token is
+                                being used or was compromised.
+                            </p>
+                        </aside>
+                    </section>
+                    <section id="compromise-recovery-authenticate-with-revocation">
+                        <h1><code>Authenticate</code> with revocation</h1>
+                        <pre><code class="elixir stretch" data-trim>
+defmodule RoutingSecurelyWithPhoenixFramework.Plug.Authenticate do
+  @doc """
+  Stores `user` in session so that `call` can retrieve it.
+  """
+  def put_session(conn, user) do
+    conn
+    |> Plug.Conn.put_session(:current_user_id, user.id)
+    |> Plug.Conn.put_session(:current_user_session_token, user.session_token)
+  end
+
+  # Private Functions
+
+  defp assign_current_user(conn = %Plug.Conn{}) do
+    assign_current_user conn,
+                        Plug.Conn.get_session(conn, :current_user_id),
+                        Plug.Conn.get_session(conn, :current_user_session_token)
+  end
+
+  defp assign_current_user(conn, id, session_token)
+       when is_integer(id) and is_binary(session_token) do
+    assign_current_user conn,
+                        Repo.get_by(User, id: id, session_token: session_token)
+  end
+  defp assign_current_user(conn, _, _), do: redirect_to_sign_in(conn)
+
+  defp assign_current_user(conn, user = %User{}) do
+    Plug.Conn.assign(conn, :current_user, user)
+  end
+  defp assign_current_user(conn, _), do: redirect_to_sign_in(conn)
+end
+                        </code></pre>
+                        <aside class="notes">
+                            <p>
+                                We add a helper function, put session (<code>put_session</code>) that can be
+                                used in the controller to setup the session keys so the plug can read them.
+                            </p>
+                            <p>
+                                assign current user (<code>assign_current_user</code>) takes the user session
+                                token as an additonal argument so that a user session is only valid if the both
+                                the id and session token (<code>session_token</code>) match, which allows us to
+                                revoke a session by changing the session token (<code>session_token</code>).
+                            </p>
+                        </aside>
+                    </section>
+                    <section id="compromise-recovery-registration-controller-create">
+                        <h1><code>RegistrationController.create</code></h1>
+                        <pre><code class="elixir stretch" data-trim>
+defmodule RoutingSecurelyWithPhoenixFramework.RegistrationController do
+  def create(conn, %{"user" => user_params}) do
+    changeset = User.changeset(%User{}, user_params)
+
+    if changeset.valid? do
+      full_changeset = User.full_changeset(changeset)
+
+      case Repo.insert(full_changeset) do
+        {:ok, user} ->
+          conn
+          |> put_flash(:info, "Successfully registered and logged in")
+          |> Authenticate.put_session(user)
+          |> redirect(to: page_path(conn, :index))
+        {:error, changeset} ->
+          render conn, "new.html", changeset: changeset
+      end
+    else
+      render conn, "new.html", changeset: changeset
+    end
+  end
+end
+                        </code></pre>
+                        <aside class="notes">
+                            <p>
+                                We use Authenticate dot put session (<code>Authenticate.put_session</code>) in
+                                the registration controller
+                            </p>
+                        </aside>
+                    </section>
+                    <section id="compromise-recovery-session-controller-sign-in">
+                        <h1><code>SessionController.sign_in</code></h1>
+                        <pre><code class="elixir stretch" data-trim>
+defmodule RoutingSecurelyWithPhoenixFramework.SessionController do
+  defp sign_in(user, password, conn) when is_map(user) do
+    if Comeonin.Bcrypt.checkpw(password, user.password_hash) do
+      conn
+      |> put_flash(:info, "You are now signed in.")
+      |> Authenticate.put_session(user)
+      |> redirect(to: page_path(conn, :index))
+    else
+      conn
+      |> put_flash(:error, @sign_in_error)
+      |> render "new.html", changeset: User.changeset(%User{})
+    end
+  end
+end
+                        </code></pre>
+                        <aside class="notes">
+                            <p>
+                                ... and also in Session Controller sign in.
+                            </p>
+                        </aside>
+                    </section>
+                    <section id="compromise-recovery-summary">
+                        <h1>Compromise Recovery</h1>
+                        <ul>
+                            <li>Ensure authentication tokens are revocable</li>
+                            <li>Delete attacker account</li>
+                            <li>Remove attackers from system</li>
+                            <li>Reset victim accounts</li>
+                            <li>Force accounts to log back in</li>
+                        </ul>
+                    </section>
+                </section>
                 <section>
                     <h1>Bibliography</h1>
                     <ul>
