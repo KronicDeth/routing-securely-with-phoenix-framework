@@ -281,7 +281,7 @@
                     </section>
                     <section id="installation-mix">
                         <h1>Installing Mix Archives</h1>
-                        <pre><code class="bash" data-trim>
+                        <pre><code class="bash stretch" data-trim style="font-size: 130%">
 mix local.hex
 mix archive.install https://github.com/phoenixframework/phoenix/releases/download/v0.17.0/phoenix_new-0.17.0.ez
                         </code></pre>
@@ -773,7 +773,7 @@ mix archive.install https://github.com/phoenixframework/phoenix/releases/downloa
                     </section>
                     <section id="configuration-secret-key-base">
                         <h1>Generating new <code>secret_key_base</code></h1>
-                        <pre><code class="elixir" data-trim>
+                        <pre><code class="elixir stretch" data-trim style="font-size: 170%; line-height: 100%">
 iex(1)> length = 64
 64
 iex(2)> :crypto.strong_rand_bytes(length) |> Base.encode64 |> binary_part(0, length)
@@ -837,7 +837,7 @@ iex(2)> :crypto.strong_rand_bytes(length) |> Base.encode64 |> binary_part(0, len
                             <figcaption>
                                 Create <code>config/dev.secret.exs</code>
                             </figcaption>
-                            <pre><code class="elixir" data-trim>
+                            <pre><code class="elixir" data-trim style="font-size: 125%; line-height: 100%">
 use Mix.Config
 
 # In this file, we keep development configuration that
@@ -886,7 +886,7 @@ config :routing_securely_with_phoenix_framework, RoutingSecurelyWithPhoenixFrame
                             <figcaption>
                                 Create <code>config/test.secret.exs</code>
                             </figcaption>
-                            <pre><code class="elixir" data-trim>
+                            <pre><code class="elixir" data-trim style="font-size: 125%; line-height: 100%">
 use Mix.Config
 
 # In this file, we keep development configuration that
@@ -1116,7 +1116,7 @@ config :routing_securely_with_phoenix_framework, RoutingSecurelyWithPhoenixFrame
                     </section>
                     <section id="tls-overview">
                         <h1>Overview</h1>
-                        <ul>
+                        <ul style="font-size: 285%">
                             <li>Transport Layer Security</li>
                             <li>Successor to SSL (Secure Socket Layer) 3.0</li>
                             <li>TLS 1.0 was defined in 1999</li>
@@ -1130,11 +1130,16 @@ config :routing_securely_with_phoenix_framework, RoutingSecurelyWithPhoenixFrame
                                 Phoenix, through Plug has built-in support for T-L-S without the need for a reverse
                                 proxy like engine-X (<code>nginx</code>).
                             </p>
+                            <p>
+                                We want to use TLS because we will be authenticating users, so if we don't use TLS, the
+                                user's passwords and cookies will be sent plain-text on the network, allowing attackers
+                                to steal them and impersonate the user.
+                            </p>
                         </aside>
                     </section>
                     <section id="tls-certificate-authority-key">
                         <h1>Certificate Authority Key</h1>
-                        <table>
+                        <table style="font-size: 150%">
                             <caption><code>openssl genrsa -des3 -out certificate-authority.key 4096</code></caption>
                             <thead>
                             <tr>
@@ -1192,7 +1197,7 @@ config :routing_securely_with_phoenix_framework, RoutingSecurelyWithPhoenixFrame
                     </section>
                     <section id="tls-self-signing-certificate-authority">
                         <h1>Self-Signing Certificate Authority</h1>
-                        <table>
+                        <table style="font-size: 120%">
                             <caption>
                                 <code>openssl req -new -x509 -days 365 -key certificate-authority.key -out certificate-authority.crt -sha256</code>
                             </caption>
@@ -1270,7 +1275,7 @@ config :routing_securely_with_phoenix_framework, RoutingSecurelyWithPhoenixFrame
                         </aside>
                     </section>
                     <section id="tls-self-signing-certificate-authority-distinguished-name">
-                        <h1>Self-Signing Certificate Authorithy Distinguished Name</h1>
+                        <h1>Self-Signing Certificate Authority Distinguished Name</h1>
                         <img alt="Entering C,ST,L,O,CN, and emailAddress for distinguished name"
                              class="stretch"
                              src="images/self-signing-certificate-authorithy-distinguished-name.png">
@@ -1294,7 +1299,7 @@ config :routing_securely_with_phoenix_framework, RoutingSecurelyWithPhoenixFrame
                     </section>
                     <section id="tls-server-key">
                         <h1>Server Key</h1>
-                        <code>openssl genrsa -out server-${MIX_ENV}.key 4096</code>
+                        <code style="font-size: 195%">openssl genrsa -out server-${MIX_ENV}.key 4096</code>
                         <aside class="notes">
                             <p>
                                 We'll generate a separate server key for each mix environment so that the server
@@ -1305,7 +1310,7 @@ config :routing_securely_with_phoenix_framework, RoutingSecurelyWithPhoenixFrame
                     </section>
                     <section id="tls-server-certificate-signing-request">
                         <h1>Server Certificate Signing Request</h1>
-                        <code>openssl req -new -key server-${MIX_ENV}.key -out server-${MIX_ENV}.csr</code>
+                        <code style="font-size: 125%">openssl req -new -key server-${MIX_ENV}.key -out server-${MIX_ENV}.csr</code>
                         <aside class="notes">
                             <p>
                                 Since the serer certificate is not self-signed, signing it is broken into two parts:
@@ -1338,7 +1343,7 @@ config :routing_securely_with_phoenix_framework, RoutingSecurelyWithPhoenixFrame
                         <h1>Signing Server Certificate Request</h1>
                         <table>
                             <caption>
-                                <code>openssl x509 -CA certificate-authority.crt  -CAcreateserial -CAkey certificate-authority.key -days 90 -in server-${MIX_ENV}.csr -out server-${MIX_ENV}.crt -req -sha256</code>
+                                <code>openssl x509 &#8209;CA certificate&#8209;authority.crt  &#8209;CAcreateserial &#8209;CAkey certificate&#8209;authority.key &#8209;days 90 &#8209;in server&#8209;${MIX_ENV}.csr &#8209;out server&#8209;${MIX_ENV}.crt &#8209;req &#8209;sha256</code>
                             </caption>
                             <thead>
                             <tr>
@@ -1357,7 +1362,10 @@ config :routing_securely_with_phoenix_framework, RoutingSecurelyWithPhoenixFrame
                             </tr>
                             <tr>
                                 <td>
-                                    <code>-CA</code>
+                                    <code>&#8209;CA</code>
+                                </td>
+                                <td>
+                                    <code>certificate&#8209;authority.crt</code>
                                 </td>
                                 <td>
                                     The Certificate Authority certificate
@@ -1365,7 +1373,7 @@ config :routing_securely_with_phoenix_framework, RoutingSecurelyWithPhoenixFrame
                             </tr>
                             <tr>
                                 <td>
-                                    <code>-CAcreateserial</code>
+                                    <code>&#8209;CAcreateserial</code>
                                 </td>
                                 <td></td>
                                 <td>
@@ -1375,16 +1383,16 @@ config :routing_securely_with_phoenix_framework, RoutingSecurelyWithPhoenixFrame
                             </tr>
                             <tr>
                                 <td>
-                                    <code>-CAkey</code>
+                                    <code>&#8209;CAkey</code>
                                 </td>
                                 <td>
-                                    <code>certificate-authority.key</code>
+                                    <code>certificate&#8209;authority.key</code>
                                 </td>
                                 <td>Certificate Authority private Key for signing request</td>
                             </tr>
                             <tr>
                                 <td>
-                                    <code>-days</code>
+                                    <code>&#8209;days</code>
                                 </td>
                                 <td>
                                     <code>90</code>
@@ -1393,10 +1401,10 @@ config :routing_securely_with_phoenix_framework, RoutingSecurelyWithPhoenixFrame
                             </tr>
                             <tr>
                                 <td>
-                                    <code>-in</code>
+                                    <code>&#8209;in</code>
                                 </td>
                                 <td>
-                                    <code>server-${MIX_ENV}.csr</code>
+                                    <code>server&#8209;${MIX_ENV}.csr</code>
                                 </td>
                                 <td>
                                     Request to be signed
@@ -1404,10 +1412,10 @@ config :routing_securely_with_phoenix_framework, RoutingSecurelyWithPhoenixFrame
                             </tr>
                             <tr>
                                 <td>
-                                    <code>-out</code>
+                                    <code>&#8209;out</code>
                                 </td>
                                 <td>
-                                    <code>server-${MIX_ENV}.crt</code>
+                                    <code>server&#8209;${MIX_ENV}.crt</code>
                                 </td>
                                 <td>
                                     Signed certificate output file
@@ -1415,14 +1423,14 @@ config :routing_securely_with_phoenix_framework, RoutingSecurelyWithPhoenixFrame
                             </tr>
                             <tr>
                                 <td>
-                                    <code>-req</code>
+                                    <code>&#8209;req</code>
                                 </td>
                                 <td></td>
                                 <td>Sign a certificate request</td>
                             </tr>
                             <tr>
                                 <td>
-                                    <code>-sha256</code>
+                                    <code>&#8209;sha256</code>
                                 </td>
                                 <td></td>
                                 <td>Sign with SHA256 instead of SHA1</td>
@@ -1433,7 +1441,7 @@ config :routing_securely_with_phoenix_framework, RoutingSecurelyWithPhoenixFrame
                     <section id="tls-trust-self-signed-certificate-authority">
                         <h1>Trust Self-Signed Certificate Authority</h1>
                         <h2>OSX</h2>
-                        <ol>
+                        <ol style="font-size: 200%">
                             <li>Open Keychain Access</li>
                             <li>Click Plus</li>
                             <li>Select <code>certificate-authority.crt</code></li>
@@ -1458,11 +1466,16 @@ config :routing_securely_with_phoenix_framework, RoutingSecurelyWithPhoenixFrame
                     </section>
                     <section id="tls-fully-qualified-domain-setup">
                         <h1>Fully Qualified Domain Setup</h1>
-                        <ol>
-                            <li><code><pre>sudo vim /etc/hosts</pre></code></li>
-                            <li>Add <code><pre>127.0.0.1 dev.routing-securely-with-phoenix-framework.localhost</pre></code></li>
-                            <li>Add <code><pre>127.0.0.1 prod.routing-securely-with-phoenix-framework.localhost</pre></code></li>
-                            <li>Add <code><pre>127.0.0.1 test.routing-securely-with-phoenix-framework.localhost</pre></code></li>
+                        <ol style="font-size: 225%">
+                            <li>Open <code>/etc/hosts</code></li>
+                            <li>
+                                <p>Add the following lines</p>
+                                <pre><code data-trim style="width: 39em">
+127.0.0.1 dev.routing-securely-with-phoenix-framework.localhost
+127.0.0.1 prod.routing-securely-with-phoenix-framework.localhost
+127.0.0.1 test.routing-securely-with-phoenix-framework.localhost
+                                </code></pre>
+                            </li>
                             <li>Restart Browsers</li>
                         </ol>
                         <aside class="notes">
@@ -1534,7 +1547,7 @@ config :routing_securely_with_phoenix_framework, RoutingSecurelyWithPhoenixFrame
                     </section>
                     <section id="tls-testing">
                         <h1>Testing TLS connection</h1>
-                        <ol>
+                        <ol style="font-size: 175%">
                             <li>
                                 <figure>
                                     <figcaption>
@@ -1661,7 +1674,7 @@ config :routing_securely_with_phoenix_framework, RoutingSecurelyWithPhoenixFrame
                     <section id="authentication-providers">
                         <h1>Authentication Providers</h1>
                         <h2>Don't store passwords if you don't have</h2>
-                        <ul>
+                        <ul style="font-size: 200%">
                             <li>
                                 Allow uses to login with OAuth:
                                 <ul>
@@ -1714,9 +1727,9 @@ config :routing_securely_with_phoenix_framework, RoutingSecurelyWithPhoenixFrame
                     </section>
                     <section id="authentication-generate-user-model">
                         <h1><code>User</code> model</h1>
-                        <table>
+                        <table style="font-size: 230%">
                             <caption>
-                                <pre><code>mix phoenix.gen.model User users name password_hash</code></pre>
+                                <pre><code class="bash" style="width: 32em">mix phoenix.gen.model User users name password_hash</code></pre>
                             </caption>
                             <thead>
                             <tr>
@@ -1763,7 +1776,7 @@ config :routing_securely_with_phoenix_framework, RoutingSecurelyWithPhoenixFrame
                     </section>
                     <section id="authentication-user-migration">
                         <h1>User Migration</h1>
-                        <pre><code class="elixir">
+                        <pre><code class="elixir stretch" data-trim style="font-size: 190%; line-height: 100%">
 defmodule RoutingSecurelyWithPhoenixFramework.Repo.Migrations.CreateUser do
   use Ecto.Migration
 
@@ -1803,7 +1816,7 @@ end
                     </section>
                     <section id="authentication-user-schema">
                         <h1>User Schema</h1>
-                        <pre><code class="elixir" data-trim>
+                        <pre><code class="elixir stretch" data-trim style="font-size: 245%; line-height: 100%">
 defmodule RoutingSecurelyWithPhoenixFramework.User do
   use RoutingSecurelyWithPhoenixFramework.Web, :model
 
@@ -1815,6 +1828,7 @@ defmodule RoutingSecurelyWithPhoenixFramework.User do
 
     timestamps
   end
+end
                         </code></pre>
                         <aside class="notes">
                             <p>
@@ -1835,7 +1849,8 @@ defmodule RoutingSecurelyWithPhoenixFramework.User do
                     </section>
                     <section id="authentication-user-changeset">
                         <h1>User Changeset</h1>
-                        <pre><code class="elixir stretch">
+                        <pre><code class="elixir stretch" data-trim style="font-size: 190%; line-height: 100%">
+defmodule RoutingSecurelyWithPhoenixFramework.User do
   @minimum_password_length 16
   @optional_fields ~w()
   @required_fields ~w(name password password_confirmation)
@@ -1854,6 +1869,7 @@ defmodule RoutingSecurelyWithPhoenixFramework.User do
     |> validate_confirmation(:password)
     |> unique_constraint(:name)
   end
+end
                         </code></pre>
                         <aside class="notes">
                             <p>
@@ -1882,9 +1898,10 @@ defmodule RoutingSecurelyWithPhoenixFramework.User do
                     </section>
                     <section id="authentication-user-password-hashing">
                         <h1>User password hashing</h1>
-                        <pre><code class="elixir stretch">
+                        <pre><code class="elixir stretch" data-trim style="font-size: 145%; line-height: 100%">
+defmodule RoutingSecurelyWithPhoenixFramework.User do
   @doc """
-  Generates a password for the user changeset and stores it to the changeset as encrypted_password.
+  Generates a password for the user changeset and stores it to the changeset as password_hash.
   """
   def generate_password(changeset) do
     put_change(changeset, :password_hash, Comeonin.Bcrypt.hashpwsalt(changeset.params["password"]))
@@ -1907,7 +1924,7 @@ end
                     </section>
                     <section id="authentication-user-registration-routes">
                         <h1>User Registration Routes</h1>
-                        <pre><code class="elixir" data-trim>
+                        <pre><code class="elixir stretch" data-trim style="font-size: 250%; line-height: 100%">
 defmodule RoutingSecurelyWithPhoenixFramework.Router do
   use RoutingSecurelyWithPhoenixFramework.Web, :router
 
@@ -1929,13 +1946,14 @@ end
                     </section>
                     <section id="authentication-user-registration-controller">
                         <h1>User Registration Controller</h1>
-                        <pre><code class="elixir" data-trim>
+                        <pre><code class="elixir" data-trim style="font-size: 200%; line-height: 100%">
 defmodule RoutingSecurelyWithPhoenixFramework.RegistrationController do
   use RoutingSecurelyWithPhoenixFramework.Web, :controller
 
   alias RoutingSecurelyWithPhoenixFramework.User
 
   plug :scrub_params, "user" when action in [:create]
+end
                         </code></pre>
                         <aside class="notes">
                             <p>
@@ -1947,7 +1965,8 @@ defmodule RoutingSecurelyWithPhoenixFramework.RegistrationController do
                     </section>
                     <section id="authentication-user-registration-controller-new">
                         <h1>User Registration Controller <code>new</code></h1>
-                        <pre><code class="elixir stretch" data-trim>
+                        <pre><code class="elixir stretch" data-trim style="font-size: 200%; line-height: 100%">
+defmodule RoutingSecurelyWithPhoenixFramework.RegistrationController do
   def new(conn, _params) do
     changeset = User.changeset(%User{})
     render conn, changeset: changeset
@@ -1965,7 +1984,7 @@ end
                     </section>
                     <section id="authentication-user-view">
                         <h1>User View</h1>
-                        <pre><code class="elixir stretch" data-trim>
+                        <pre><code class="elixir stretch" data-trim style="font-size: 200%; line-height: 100%">
 defmodule RoutingSecurelyWithPhoenixFramework.RegistrationView do
   use RoutingSecurelyWithPhoenixFramework.Web, :view
 end
@@ -1979,7 +1998,7 @@ end
                     </section>
                     <section id="authentication-user-new-template">
                         <h1>User <code>new</code> Template</h1>
-                        <pre><code class="stretch" data-trim>
+                        <pre><code class="stretch" data-trim style="font-size: 155%; line-height: 100%">
 &lt;h3&gt;Registration&lt;/h3&gt;
 &lt;%= form_for @changeset, registration_path(@conn, :create), fn f -&gt; %&gt;
 &lt;%= if f.errors != [] do %&gt;
@@ -2033,7 +2052,8 @@ end
                     </section>
                     <section id="authentication-user-registration-controller-create">
                         <h1>User Registration Controller <code>create</code></h1>
-                        <pre><code class="elixir stretch" data-trim>
+                        <pre><code class="elixir stretch" data-trim style="font-size: 200%; line-height: 100%">
+defmodule RoutingSecurelyWithPhoenixFramework.RegistrationController do
   def create(conn, %{"user" => user_params}) do
     changeset = User.changeset(%User{}, user_params)
 
@@ -2051,6 +2071,7 @@ end
       render conn, "new.html", changeset: changeset
     end
   end
+end
                         </code></pre>
                         <aside class="notes">
                             <p>
@@ -2079,7 +2100,7 @@ end
                     </section>
                     <section id="authentication-page-routes">
                         <h1>Page Routes</h1>
-                        <pre><code class="elixir stretch" data-trim>
+                        <pre><code class="elixir stretch" data-trim style="font-size: 250%; line-height: 100%">
 defmodule RoutingSecurelyWithPhoenixFramework.Router do
   scope "/", RoutingSecurelyWithPhoenixFramework do
     get "/pages", PageController, :index
@@ -2095,7 +2116,7 @@ end
                     </section>
                     <section id="authentication-page-controller-authentication">
                         <h1>Page Controller Authentication</h1>
-                        <pre><code class="elixir stretch" data-trim>
+                        <pre><code class="elixir stretch" data-trim style="font-size: 230%; line-height: 100%">
 defmodule RoutingSecurelyWithPhoenixFramework.PageController do
   plug RoutingSecurelyWithPhoenixFramework.Plug.Authenticate
 end
@@ -2109,7 +2130,7 @@ end
                     </section>
                     <section id="authentication-authenticate-plug">
                         <h1>Authenticate Plug</h1>
-                        <pre><code class="elixir stretch" data-trim>
+                        <pre><code class="elixir stretch" data-trim style="font-size: 150%; line-height: 100%">
 defmodule RoutingSecurelyWithPhoenixFramework.Plug.Authenticate do
   import RoutingSecurelyWithPhoenixFramework.Router.Helpers
 
@@ -2172,7 +2193,7 @@ end
                     </section>
                     <section id="authentication-session-routes">
                         <h1>Session Routes</h1>
-                        <pre><code class="elixir stretch" data-trim>
+                        <pre><code class="elixir stretch" data-trim style="font-size: 250%; line-height: 100%">
 defmodule RoutingSecurelyWithPhoenixFramework.Router do
   scope "/", RoutingSecurelyWithPhoenixFramework do
     get "/", SessionController, :new
@@ -2194,13 +2215,14 @@ end
                     </section>
                     <section id="authentication-session-controller">
                         <h1>Session Controller</h1>
-                          <pre><code class="elixir stretch" data-trim>
+                          <pre><code class="elixir stretch" data-trim style="font-size: 200%; line-height: 100%">
 defmodule RoutingSecurelyWithPhoenixFramework.SessionController do
   use RoutingSecurelyWithPhoenixFramework.Web, :controller
 
   alias RoutingSecurelyWithPhoenixFramework.User
 
   plug :scrub_params, "user" when action in [:create]
+end
                           </code></pre>
                         <aside class="notes">
                             <p>
@@ -2211,10 +2233,12 @@ defmodule RoutingSecurelyWithPhoenixFramework.SessionController do
                     </section>
                     <section id="authentication-session-controller-new">
                         <h1>Session Controller <code>new</code></h1>
-                        <pre><code class="elixir stretch" data-trim>
+                        <pre><code class="elixir stretch" data-trim style="font-size: 220%; line-height: 100%">
+defmodule RoutingSecurelyWithPhoenixFramework.SessionController do
   def new(conn, _params) do
     render conn, changeset: User.changeset(%User{})
   end
+end
                         </code></pre>
                         <aside class="notes">
                             <p>
@@ -2225,7 +2249,7 @@ defmodule RoutingSecurelyWithPhoenixFramework.SessionController do
                     </section>
                     <section id="authentication-session-view">
                         <h1>Session View</h1>
-                        <pre><code class="elixir stretch" data-trim>
+                        <pre><code class="elixir stretch" data-trim style="font-size: 240%; line-height: 100%">
 defmodule RoutingSecurelyWithPhoenixFramework.SessionView do
   use RoutingSecurelyWithPhoenixFramework.Web, :view
 end
@@ -2242,7 +2266,7 @@ end
                     </section>
                     <section id="authentication-session-new-template">
                         <h1>Session <code>new</code> Template</h1>
-                        <pre><code class="stretch" data-trim>
+                        <pre><code class="stretch" data-trim style="font-size: 145%; line-height: 100%">
 &lt;h3&gt;Login&lt;/h3&gt;
 &lt;%= form_for @changeset, session_path(@conn, :create), fn f -&gt; %&gt;
 &lt;%= if f.errors != [] do %&gt;
@@ -2281,7 +2305,8 @@ end
                     </section>
                     <section id="authentication-session-controller-create">
                         <h1>Session Controller <code>create</code></h1>
-                        <pre><code class="elixir stretch" data-trim>
+                        <pre><code class="elixir stretch" data-trim style="font-size: 170%; line-height: 100%">
+defmodule RoutingSecurelyWithPhoenixFramework.SessionController do
   def create(conn, %{"user" => user_params}) do
     if is_nil(user_params["name"]) do
       nil
@@ -2312,6 +2337,7 @@ end
       |> render "new.html", changeset: User.changeset(%User{})
     end
   end
+end
                         </code></pre>
                         <aside class="notes">
                             <p>
@@ -2349,7 +2375,7 @@ end
                     </section>
                     <section id="authentication-session-status">
                         <h1>Session Status</h1>
-                        <pre><code class="stretch" data-trim>
+                        <pre><code class="stretch" data-trim style="font-size: 135%; line-height: 100%">
 &lt;!DOCTYPE html&gt;
 &lt;html lang="en"&gt;
   &lt;body&gt;
@@ -2385,11 +2411,13 @@ end
                     </section>
                     <section id="authentication-session-controller-delete">
                         <h1>Session Controller <code>delete</code></h1>
-                        <pre><code class="elixir stretch" data-trim>
-def delete(conn, _) do
-  delete_session(conn, :current_user_id)
-  |> put_flash(:info, "You have been logged out")
-  |> redirect(to: session_path(conn, :new))
+                        <pre><code class="elixir stretch" data-trim style="font-size: 220%; line-height: 100%">
+defmodule RoutingSecurelyWithPhoenixFramework.SessionController do
+  def delete(conn, _) do
+    delete_session(conn, :current_user_id)
+    |> put_flash(:info, "You have been logged out")
+    |> redirect(to: session_path(conn, :new))
+  end
 end
                         </code></pre>
                         <aside class="notes">
@@ -2427,7 +2455,7 @@ end
                     <section id="csrf-overview">
                         <h1>CSRF</h1>
                         <h2>Cross-Site Request Forgery</h2>
-                        <ol>
+                        <ol style="font-size: 120%">
                             <li>User is logged into goodsite.com</li>
                             <li>User visits badsite.com</li>
                             <li>badsite.com contains a link to goodsite.com/widgets/sell</li>
@@ -2444,7 +2472,7 @@ end
                     </section>
                     <section id="csrf-false-protections">
                         <h1>False CSRF Protections</h1>
-                        <ul>
+                        <ul style="font-size: 400%">
                             <li>Secret Cookie</li>
                             <li>Not accepting <code>GET</code> requests</li>
                             <li>Multi-Step Transactions</li>
@@ -2474,7 +2502,7 @@ end
                     </section>
                     <section id="csrf-protections">
                         <h1>CSRF Protections</h1>
-                        <ul>
+                        <ul style="font-size: 230%">
                             <li><code>GET</code> requests MUST NOT change state</li>
                             <li>No XSS vulnerabilities</li>
                             <li>Double submit cookie in requests that change state</li>
@@ -2500,11 +2528,11 @@ end
                     </section>
                     <section id="csrf-token-in-forms">
                         <h1>CSRF Token in Forms</h1>
-                        <pre><code data-trim>
+                        <pre><code data-trim style="font-size: 135%; line-height: 100%">
 &lt;h3&gt;Registration&lt;/h3&gt;
 &lt;%= form_for @changeset, registration_path(@conn, :create), fn f -&gt; %&gt;                            
                         </code></pre>
-                        <pre><code data-trim>
+                        <pre><code data-trim style="font-size: 130%; line-height: 100%">
 &lt;form accept-charset="UTF-8" action="/registration" method="post"&gt;
     &lt;input name="_csrf_token" type="hidden" value="e3JoLCxfDyBXFHYaNVgjOwEeQx4uNgAA000tv4wt1p1bv4wOMVtHiQ=="&gt;
                         </code></pre>
@@ -2631,7 +2659,7 @@ end
                     </section>
                     <section id="channel-overview">
                         <h1>Overview</h1>
-                        <ul>
+                        <ul style="font-size: 200%">
                             <li>Bidirectional communications from clients</li>
                             <li>Transported over Websockets or Long Polling</li>
                             <li>Browser, Android, and iOS clients</li>
@@ -2651,7 +2679,7 @@ end
                     </section>
                     <section id="channels-template-pages">
                         <h1>Pages Template</h1>
-                        <pre><code data-trim>
+                        <pre><code class="html stretch" data-trim style="font-size: 250%; line-height: 100%">
 &lt;div id="messages" class="container"&gt;&lt;/div&gt;
 &lt;div id="footer"&gt;
   &lt;div class="container"&gt;
@@ -2679,19 +2707,18 @@ end
                             <figcaption>
                                 <code>package.json</code>
                             </figcaption>
-                            <pre><code class="javascript" data-trim style="width: 100%">
+                            <pre><code class="javascript" data-trim style="font-size: 240%; line-height: 100%; width: 100%">
 {
   "dependencies": {
     "jquery": "~2.1"
   }
 }
-
                             </code></pre>
                         </figure>
                         <figure>
                             <figcaption>
                                 <code>brunch-config.js</code>
-                                <pre><code class="javascript" data-trim style="width: 100%">
+                                <pre><code class="javascript" data-trim style="font-size: 240%; line-height: 100%; width: 100%">
 exports.config = {
   plugins: {
     babel: {
@@ -2715,7 +2742,7 @@ exports.config = {
                     </section>
                     <section id="channels-socket-js">
                         <h1><code>socket.js</code></h1>
-                        <pre><code class="javascript stretch" data-trim>
+                        <pre><code class="javascript stretch" data-trim style="font-size: 140%; line-height: 100%">
 import {Socket} from "deps/phoenix/web/static/js/phoenix"
 import $ from "jquery"
 
@@ -2777,7 +2804,7 @@ export default socket
                     </section>
                     <section id="channels-socket-token-meta-tag">
                         <h1><code>socket_token</code> <code>meta</code> tag</h1>
-                        <pre><code data-trim>
+                        <pre><code data-trim style="font-size: 145%; line-heigh: 100%">
 &lt;!DOCTYPE html&gt;
 &lt;html lang="en"&gt;
   &lt;head&gt;
@@ -2820,7 +2847,7 @@ export default socket
                     </section>
                     <section id="channels-adding-socket-token-to-users">
                         <h1>Adding <code>socket_token</code> to <code>users</code></h1>
-                        <pre><code class="elixir stretch" data-trim>
+                        <pre><code class="elixir stretch" data-trim style="font-size: 130%; line-height: 100%">
 defmodule RoutingSecurelyWithPhoenixFramework.Repo.Migrations.AddChannelTokenToUser do
   use Ecto.Migration
 
@@ -2863,7 +2890,7 @@ end
                     </section>
                     <section id="channels-adding-socket-token-to-user-schema">
                         <h1>Adding <code>socket_token</code> to <code>User</code> schema</h1>
-                        <pre><code class="elixir stretch" data-trim>
+                        <pre><code class="elixir stretch" data-trim style="font-size: 275%; line-height: 100%">
 defmodule RoutingSecurelyWithPhoenixFramework.User do
   schema "users" do
     field :socket_token, :string
@@ -2879,7 +2906,7 @@ end
                     </section>
                     <section id="channels-generating-secrets-on-registration">
                         <h1>Generating secrets on registration</h1>
-                        <pre><code class="elixir stretch" data-trim>
+                        <pre><code class="elixir stretch" data-trim style="font-size: 200%; line-height: 100%">
 defmodule RoutingSecurelyWithPhoenixFramework.RegistrationController do
   def create(conn, %{"user" => user_params}) do
     changeset = User.changeset(%User{}, user_params)
@@ -2911,7 +2938,7 @@ end
                     </section>
                     <section id="channels-user-full-changeset">
                         <h1><code>User.full_changeset/1</code></h1>
-                        <pre><code class="elixir stretch" data-trim>
+                        <pre><code class="elixir stretch" data-trim style="font-size: 180%; line-height: 100%">
 defmodule RoutingSecurelyWithPhoenixFramework.User do
   @socket_token_length 64
 
@@ -2955,7 +2982,7 @@ end
                     </section>
                     <section id="channels-user-socket-connect">
                         <h1><code>UserSocket.connect/2</code></h1>
-                        <pre><code class="elixir stretch" data-trim>
+                        <pre><code class="elixir stretch" data-trim style="font-size: 180%; line-height: 100%">
 defmodule RoutingSecurelyWithPhoenixFramework.UserSocket do
   @seconds_per_minute 60
   @minutes_per_hour 60
@@ -3010,11 +3037,14 @@ end
                     </section>
                     <section id="channels-user-socket-id">
                         <h1><code>UserSocket.id/1</code></h1>
-                        <pre><code class="elixir stretch" data-trim>
+                        <pre><code class="elixir stretch" data-trim style="font-size: 130%; line-height: 100%">
 defmodule RoutingSecurelyWithPhoenixFramework.UserSocket do
+  @doc """
+  Group all sockets for a given user together so they can be disconnected.
+
   # Disconnecting a compromised user
 
-      iex> RoutingSecurelyWithPhoenixFramework.Endpoint.broadcast("user_sockets:" <> user_id, "disconnect")
+      iex> RoutingSecurelyWithPhoenixFramework.Endpoint.broadcast("user_sockets:" <> user_id, "disconnect", %{})
   """
   def id(socket) do
     "user_sockets:#{socket.assigns.user_id}"
@@ -3031,7 +3061,7 @@ end
                     </section>
                     <section id="channels-room-channel">
                         <h1><code>RoomChannel</code></h1>
-                        <pre><code class="elixir stretch" data-trim>
+                        <pre><code class="elixir stretch" data-trim style="font-size: 180%; line-height: 100%">
 defmodule RoutingSecurelyWithPhoenixFramework.RoomChannel do
   use RoutingSecurelyWithPhoenixFramework.Web, :channel
 
@@ -3123,7 +3153,7 @@ end
                     <section id="xss-overview">
                         <h1>XSS</h1>
                         <h1>Cross-Site Scripting</h1>
-                        <ol>
+                        <ol style="font-size: 200%">
                             <li>Chuck posts a message containing &lt;script&gt; tag</li>
                             <li>Kronic Deth views message and script executes in his browser</li>
                             <li>Chuck can now act as Kronic Deth</li>
@@ -3144,7 +3174,7 @@ end
                     </section>
                     <section id="xss-poc">
                         <h1>Proof-of-Concept</h1>
-                        <pre><code class="stretch" data-trim>
+                        <pre><code class="stretch" data-trim style="font-size: 195%; line-height: 100%">
 &lt;script&gt;
   $ = require("jquery");
   userName = $("nav span.label-info").text().trim();
@@ -3176,7 +3206,7 @@ end
                     </section>
                     <section id="xss-prevention">
                         <h1>XSS Prevention</h1>
-                        <ul>
+                        <ul style="font-size: 180%">
                             <li>Never Insert Untrusted Data</li>
                             <li>Escaping untrusted data must be tuned to the insertion environment</li>
                             <li>Don't write your own escaping library</li>
@@ -3198,7 +3228,7 @@ end
                     </section>
                     <section id="xss-escaping-location">
                         <h1>Escaping Location</h1>
-                        <ol>
+                        <ol style="font-size: 200%">
                             <li>
                                 <p>Client-side</p>
                                 <ul class="procon">
@@ -3233,7 +3263,7 @@ end
                     </section>
                     <section id="xss-escaping-channel-messages">
                         <h1>Escaping Channel Messages</h1>
-                        <pre><code class="elixir scretch" data-trim>
+                        <pre><code class="elixir stretch" data-trim style="font-size: 180%; line-height: 100%">
 defmodule RoutingSecurelyWithPhoenixFramework.RoomChannel do
   @doc """
   Broadcast a message from one user to all users (including the originating user)
@@ -3357,7 +3387,7 @@ end
                     </section>
                     <section id="compromise-recovery-remote-shell">
                         <h1>Remote Shell</h1>
-                        <ol class="stretch">
+                        <ol class="stretch" style="font-size: 200%">
                             <li>
                                 <p>Run server on a named node with a known cookie</p>
                                 <pre><code class="bash" data-trim>iex --cookie $COOKIE --name server@$HOST -S mix phoenix.server</code></pre>
@@ -3377,7 +3407,7 @@ end
                     </section>
                     <section id="compromise-recovery-evict-from-remote-shell">
                         <h1>Evict Attacker using Remote Shell</h1>
-                        <ol class="stretch">
+                        <ol class="stretch" style="font-size: 200%">
                             <li>
                                 <p>Setup some aliases</p>
                                 <pre><code class="elixir" data-trim>
@@ -3411,12 +3441,16 @@ Endpoint.broadcast("user_sockets:#{user.id}", "disconnect", %{})
                     </section>
                     <section id="compromise-recovery-secure-kronic-deth">
                         <h1>Secure Victim using Remote Shell</h1>
-                        <ol class="stretch">
+                        <ol class="stretch" style="font-size: 200%">
                             <li>
                                 <p>Reset Password</p>
                                 <pre><code class="elixir" data-trim>
 user = Repo.get_by!(User, name: "Kronic Deth")
-changeset = User.changeset(user, %{"password" => new_password, "password_confirmation" => new_password})
+changeset = User.changeset user,
+                           %{
+                             "password" => new_password,
+                             "password_confirmation" => new_password
+                           }
                                 </code></pre>
                             </li>
                             <li>
@@ -3453,7 +3487,7 @@ Endpoint.broadcast("user_sockets:#{user.id}", "disconnect", %{})
                     </section>
                     <section id="compromise-recovery-invalidating-sessions">
                         <h1>Invalidating Sessions</h1>
-                        <ol>
+                        <ol style="font-size: 200%">
                             <li>Reset Kronic Deth's session</li>
                             <li>Reset <code>secret_key_base</code></li>
                         </ol>
@@ -3473,7 +3507,7 @@ Endpoint.broadcast("user_sockets:#{user.id}", "disconnect", %{})
                     </section>
                     <section id="compromise-recovery-authenticate-review">
                         <h1>Authenticate (Review)</h1>
-                        <pre><code class="elixir stretch" data-trim>
+                        <pre><code class="elixir stretch" data-trim style="font-size: 190%; line-height: 100%">
 defmodule RoutingSecurelyWithPhoenixFramework.Plug.Authenticate
   defp assign_current_user(conn = %Plug.Conn{}) do
     assign_current_user(conn, Plug.Conn.get_session(conn, :current_user_id))
@@ -3511,7 +3545,7 @@ end
                     </section>
                     <section id="compromise-recovery-token-control">
                         <h1>Authentication Tokens</h1>
-                        <ul>
+                        <ul style="font-size: 300%">
                             <li>Tamper evident</li>
                             <li>Expire</li>
                             <li class="fragment">Revocable by server</li>
@@ -3533,7 +3567,7 @@ end
                     </section>
                     <section id="compromise-recovery-add-session-token-to-users">
                         <h1>Add <code>session_token</code> to <code>users</code></h1>
-                        <pre><code class="elixir stretch" data-trim>
+                        <pre><code class="elixir stretch" data-trim style="font-size: 125%; line-height: 100%">
 defmodule RoutingSecurelyWithPhoenixFramework.Repo.Migrations.AddSessionTokenToUser do
   use Ecto.Migration
 
@@ -3568,7 +3602,7 @@ end
                     </section>
                     <section id="compromise-recovery-adding-session-token-to-user-schema">
                         <h1>Adding <code>session_token</code> to <code>User</code> schema</h1>
-                        <pre><code class="elixir stretch" data-trim>
+                        <pre><code class="elixir stretch" data-trim style="font-size: 275%; line-height: 100%">
 defmodule RoutingSecurelyWithPhoenixFramework.User do
   schema "users" do
     field :session_token, :string
@@ -3583,7 +3617,7 @@ end
                     </section>
                     <section>
                         <h1><code>User.full_changeset/1</code></h1>
-                        <pre><code class="elixir stretch" data-trim>
+                        <pre><code class="elixir stretch" data-trim style="font-size: 190%; line-height: 100%">
 defmodule RoutingSecurelyWithPhoenixFramework.User do
   @token_length 64
 
@@ -3619,7 +3653,7 @@ end
                     </section>
                     <section id="compromise-recovery-authenticate-with-revocation">
                         <h1><code>Authenticate</code> with revocation</h1>
-                        <pre><code class="elixir stretch" data-trim>
+                        <pre><code class="elixir stretch" data-trim style="font-size: 180%; line-height: 100%">
 defmodule RoutingSecurelyWithPhoenixFramework.Plug.Authenticate do
   @doc """
   Stores `user` in session so that `call` can retrieve it.
@@ -3666,7 +3700,7 @@ end
                     </section>
                     <section id="compromise-recovery-registration-controller-create">
                         <h1><code>RegistrationController.create</code></h1>
-                        <pre><code class="elixir stretch" data-trim>
+                        <pre><code class="elixir stretch" data-trim style="font-size: 200%; line-height: 100%">
 defmodule RoutingSecurelyWithPhoenixFramework.RegistrationController do
   def create(conn, %{"user" => user_params}) do
     changeset = User.changeset(%User{}, user_params)
@@ -3698,7 +3732,7 @@ end
                     </section>
                     <section id="compromise-recovery-session-controller-sign-in">
                         <h1><code>SessionController.sign_in</code></h1>
-                        <pre><code class="elixir stretch" data-trim>
+                        <pre><code class="elixir stretch" data-trim style="font-size: 220%; line-height: 100%">
 defmodule RoutingSecurelyWithPhoenixFramework.SessionController do
   defp sign_in(user, password, conn) when is_map(user) do
     if Comeonin.Bcrypt.checkpw(password, user.password_hash) do
@@ -3722,7 +3756,7 @@ end
                     </section>
                     <section id="compromise-recovery-summary">
                         <h1>Compromise Recovery</h1>
-                        <ul>
+                        <ul style="font-size: 200%">
                             <li>Ensure authentication tokens are revocable</li>
                             <li>Delete attacker account</li>
                             <li>Remove attackers from system</li>
@@ -3730,6 +3764,63 @@ end
                             <li>Force accounts to log back in</li>
                         </ul>
                     </section>
+                </section>
+                <section id="summary">
+                    <h1>Summary</h1>
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>Vulnerability</th>
+                            <th>Protection</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td>Database password being disclosed from Github search</td>
+                            <td><code>config/*.secret.exs</code></td>
+                        </tr>
+                        <tr>
+                            <td>Cookie <code>secret_key_base</code> being disclosed from Github search</td>
+                            <td><code>config/*.secret.exs</code></td>
+                        </tr>
+                        <tr>
+                            <td>Password being sniffed on the network</td>
+                            <td>TLS</td>
+                        </tr>
+                        <tr>
+                            <td>Cookies being sniffed on the network</td>
+                            <td>TLS</td>
+                        </tr>
+                        <tr>
+                            <td>CSRF in HTML forms</td>
+                            <td><code>form_for</code> adds hidden <code>_csrf_token</code> input</td>
+                        </tr>
+                        <tr>
+                            <td>XSS in HTML views</td>
+                            <td><code>Phoenix.HTML</code> does escaping for <code>*.html.eex</code></td>
+                        </tr>
+                        <tr>
+                            <td>XSS in channel messages</td>
+                            <td><code>Plug.Conn.html_escape</code> explicitly</td>
+                        </tr>
+                        <tr>
+                            <td>Session can't be revoked</td>
+                            <td>Store token in session and check against database in authentication plug</td>
+                        </tr>
+                        <tr>
+                            <td>Socket access can't be revoked</td>
+                            <td>Store token in signed-token and check against database in <code>connect/2</code></td>
+                        </tr>
+                        <tr>
+                            <td>
+                                Socket access can't be revoked until new websocket connection
+                            </td>
+                            <td>
+                                Non-<code>nil</code> <code>id/1</code> and <code>Endpoint.broadcast(id, "disconnect", %{})</code>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
                 </section>
                 <section>
                     <h1>Bibliography</h1>
